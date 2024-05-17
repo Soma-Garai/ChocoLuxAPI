@@ -1,0 +1,110 @@
+﻿using ChocoLuxAPI.Constants;
+using ChocoLuxAPI.Helpers;
+using ChocoLuxAPI.Models;
+using ChocoLuxAPI.ViewModels;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+
+namespace ChocoLuxAPI.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class PermissionController : ControllerBase
+    {
+        private readonly RoleManager<IdentityRole> _roleManager;
+
+        public PermissionController(RoleManager<IdentityRole> roleManager)
+        {
+            _roleManager = roleManager;
+        }
+
+        // This method is rendering the data for manage permission view.
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetPermissions(string id)
+        {
+            // A new instance of PermissionViewModel is created to hold data for the view.
+            var model = new PermissionViewModel();
+            // A new empty list of RoleClaimsViewModel objects is created to hold all permissions.
+            var allPermissions = new List<RoleClaimsViewModel>();
+
+            // Permissions for the "Products" module are retrieved using the GeneratePermissionsForModule method from
+            // the Permissions class. Each permission is converted into a RoleClaimsViewModel object and
+            // added to the allPermissions list.
+            var productsPermissions = Permissions<Product>.GeneratePermissionsForModule("Products")
+                                           .Select(permission => new RoleClaimsViewModel { Value = permission })
+                                           .ToList();
+            allPermissions.AddRange(productsPermissions);
+
+            // Retrieve permissions for the "Order" module
+            var orderPermissions = Permissions<Orders>.GeneratePermissionsForModule("Orders")
+                                           .Select(permission => new RoleClaimsViewModel { Value = permission })
+                                           .ToList();
+            allPermissions.AddRange(orderPermissions);
+
+            // Retrieve the role based on the provided role ID
+            var role = await _roleManager.FindByIdAsync(id);
+            if (role == null)
+            {
+                // Handle the case where the role is not found
+                return NotFound($"Role with ID {id} not found.");
+            }
+
+            // The RoleId property of the model is set
+            model.RoleId = id;
+
+            // Claims associated with the retrieved role are retrieved 
+            var claims = await _roleManager.GetClaimsAsync(role);
+            // The values of these claims are extracted into a list.
+            var roleClaimValues = claims.Select(a => a.Value).ToList();
+
+            // The intersection of all permission values and role claim values is calculated to find
+            // which permissions are authorized for the role.
+            var authorizedClaims = allPermissions.Select(a => a.Value)
+                                                 .Intersect(roleClaimValues)
+                                                 .ToList();
+
+            // For each permission in allPermissions, if the permission's value is found in the authorizedClaims list,
+            // the Selected property of that permission in the model is set to true.
+            foreach (var permission in allPermissions)
+            {
+                if (authorizedClaims.Any(aC => aC == permission.Value))
+                {
+                    permission.Selected = true;
+                }
+            }
+
+            // Finally, the RoleClaims property of the model is set to the list of all permissions,
+            // including their selection status.
+            model.RoleClaims = allPermissions;
+
+            return Ok(model);
+        }
+
+        // Once the Admin maps new Permission to a selected user and clicks the Save Button,
+        // the enabled permissions are added to the Role.
+        [HttpPost("update")]
+        public async Task<IActionResult> Update([FromBody] PermissionViewModel model)
+        {
+            var role = await _roleManager.FindByIdAsync(model.RoleId);
+            if (role == null)
+            {
+                return NotFound($"Role with ID {model.RoleId} not found.");
+            }
+
+            var claims = await _roleManager.GetClaimsAsync(role);
+            foreach (var claim in claims)
+            {
+                await _roleManager.RemoveClaimAsync(role, claim);
+            }
+
+            var selectedClaims = model.RoleClaims.Where(a => a.Selected).ToList();
+            foreach (var claim in selectedClaims)
+            {
+                await _roleManager.AddPermissionClaim(role, claim.Value); // AddPermissionClaim method is defined in ClaimsHelper
+            }
+
+            return Ok();
+        }
+    }
+}
