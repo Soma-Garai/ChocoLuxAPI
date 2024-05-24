@@ -5,7 +5,8 @@ namespace ChocoLuxAPI.Models
 {
     public class Cart
     {
-        public int CartId { get; set; }
+        //public int CartId { get; set; }
+        public Guid CartId = Guid.NewGuid();
         public List<CartItem> Items { get; set; } = new List<CartItem>();
 
         //public void AddItem(ProductViewModel product, int quantity)

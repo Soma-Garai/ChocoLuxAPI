@@ -68,7 +68,7 @@ namespace ChocoLuxAPI.Controllers
                 {
                     OrderId = order.OrderId,
 
-                    ProductId = productViewModel.product_id,
+                    //ProductId = productViewModel.product_id,
                     ProductName = productViewModel.product_name,
                     Quantity = quantity,
                     product_price = productViewModel.product_price
@@ -99,7 +99,7 @@ namespace ChocoLuxAPI.Controllers
         }
 
         [HttpGet("order/{orderId}")]
-        public IActionResult OrderConfirmation(int orderId)
+        public IActionResult OrderConfirmation(Guid orderId)
         {
             // Retrieve the order from the database based on orderId
             var order = _context.tblOrders

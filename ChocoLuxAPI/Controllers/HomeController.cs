@@ -18,21 +18,21 @@ namespace ChocoLuxAPI.Controllers
             _appDbContext = appDbContext;
         }
         [HttpGet]
-        [Route("index")]
+        [Route("index")]  //allProducts
         public IActionResult Index()
         {
             // Retrieve products from the database along with categories 
             var productsWithCategories = _appDbContext.tblProducts
-                .Include(p => p.Category) // Include category information
+                .Include(p => p.category) // Include category information
                 .Select(p => new ProductWithCategoryViewModel
                 {
-                    product_id = p.product_id,
+                    //product_id = p.product_id,
                     product_name = p.product_name,
                     product_description = p.product_description,
                     product_price = p.product_price,
                     product_ImagePath = p.product_ImagePath,
                     CategoryId = p.CategoryId,
-                    CategoryName = p.Category.CategoryName // Assuming there's a property for CategoryName in Category entity
+                    CategoryName = p.CategoryName // Assuming there's a property for CategoryName in Category entity
                 })
                 .ToList();
             //ViewBag.ProductsWithCategories = productsWithCategories;
@@ -47,20 +47,20 @@ namespace ChocoLuxAPI.Controllers
 
         [HttpGet]
         [Route("chocolates")]
-        public IActionResult Chocolates([FromQuery]int? categoryId)
+        public IActionResult Chocolates([FromQuery]Guid? categoryId)
         {
             // Retrieve products from the database along with categories 
             var productsWithCategories = _appDbContext.tblProducts
-                .Include(p => p.Category) // Include category information
+                .Include(p => p.category) // Include category information
                 .Select(p => new ProductWithCategoryViewModel
                 {
-                    product_id = p.product_id,
+                    //product_id = p.product_id,
                     product_name = p.product_name,
                     product_description = p.product_description,
                     product_price = p.product_price,
                     product_ImagePath = p.product_ImagePath,
                     CategoryId = p.CategoryId,
-                    CategoryName = p.Category.CategoryName // Assuming there's a property for CategoryName in Category entity
+                    CategoryName = p.CategoryName // Assuming there's a property for CategoryName in Category entity
                 })
                 .ToList();
             // Filter products based on categoryId if provided

@@ -24,14 +24,14 @@ namespace ChocoLuxAPI.Controllers
             return Ok();
         }
 
-        [HttpDelete("remove/{productId}")]
-        public IActionResult RemoveFromCart(int productId)
-        {
-            var itemToRemove = cartItems.FirstOrDefault(item => item.Product.product_id == productId);
-            if (itemToRemove != null)
-                cartItems.Remove(itemToRemove);
-            return Ok();
-        }
+        //[HttpDelete("remove/{productId}")]
+        //public IActionResult RemoveFromCart(int productId)
+        //{
+        //    var itemToRemove = cartItems.FirstOrDefault(item => item.Product.product_id == productId);
+        //    if (itemToRemove != null)
+        //        cartItems.Remove(itemToRemove);
+        //    return Ok();
+        //}
 
         //[HttpPut("update/{productId}")]
         //public IActionResult UpdateCartItemQuantity(int productId, [FromBody] int quantity)

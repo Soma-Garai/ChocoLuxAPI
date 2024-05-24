@@ -5,7 +5,8 @@ namespace ChocoLuxAPI.ViewModels
 {
     public class ProductViewModel
     {
-        public int product_id { get; set; }
+        public Guid product_id { get; set; }
+        //public int product_id { get; set; }
         public string? product_name { get; set; }
         public string? product_description { get; set; }
         public int? product_price { get; set; }
@@ -17,7 +18,7 @@ namespace ChocoLuxAPI.ViewModels
         public string? product_ImagePath { get; set; }
 
 
-        public int CategoryId { get; set; }      // Foreign key
+        public Guid CategoryId { get; set; }      // Foreign key
         public Category? category { get; set; }  // Navigation property
         public string? CategoryName { get; set; }
     }
