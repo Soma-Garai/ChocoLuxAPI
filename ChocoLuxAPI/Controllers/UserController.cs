@@ -1,6 +1,6 @@
-﻿using ChocoLuxAPI.Models;
+﻿using ChocoLuxAPI.DTO;
+using ChocoLuxAPI.Models;
 using ChocoLuxAPI.Services;
-using ChocoLuxAPI.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -28,7 +28,7 @@ namespace ChocoLuxAPI.Controllers
         }
 
         [HttpPost("Register")]
-        public async Task<IActionResult> Register(RegisterViewModel model)
+        public async Task<IActionResult> Register(RegisterDto model)
         {
             if (!ModelState.IsValid)
             {
@@ -54,7 +54,7 @@ namespace ChocoLuxAPI.Controllers
         }
 
         [HttpPost("Login")]
-        public async Task<IActionResult> Login(LoginViewModel model)
+        public async Task<IActionResult> Login(LoginDto model)
         {
             // Attempts to find a user by their username/email using the UserManager
             var user = await _userManager.FindByEmailAsync(model.Email);

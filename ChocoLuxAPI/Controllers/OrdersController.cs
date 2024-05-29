@@ -55,13 +55,13 @@ namespace ChocoLuxAPI.Controllers
             foreach (var item in cart.Items)
             {
                 int quantity = item.Quantity;
-                var productViewModel = item.Product;
+                var productDto = item.Product;
                 //var product = _context.tblProducts.FirstOrDefault(p => p.product_id == item.Product.product_id);
-                if (productViewModel == null)
+                if (productDto == null)
                 {
                     // Product not found, handle accordingly
                     // For example, return a BadRequest response
-                    return BadRequest($"Product with ID {item.Product.product_id} not found");
+                    return BadRequest($"Product not found");
                 }
 
                 var orderDetail = new OrderDetails
@@ -69,13 +69,13 @@ namespace ChocoLuxAPI.Controllers
                     OrderId = order.OrderId,
 
                     //ProductId = productViewModel.product_id,
-                    ProductName = productViewModel.product_name,
+                    ProductName = productDto.ProductName,
                     Quantity = quantity,
-                    product_price = productViewModel.product_price
+                    ProductPrice = productDto.ProductPrice
                 };
 
                 // Calculate TotalPrice for this order detail
-                orderDetail.TotalPrice = orderDetail.Quantity * orderDetail.product_price;
+                orderDetail.TotalPrice = orderDetail.Quantity * orderDetail.ProductPrice;
 
                 // Add the order detail to the database
                 _context.tblOrderDetails.Add(orderDetail);

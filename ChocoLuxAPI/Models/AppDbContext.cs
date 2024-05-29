@@ -1,5 +1,4 @@
-﻿using ChocoLuxAPI.ViewModels;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,16 +19,16 @@ namespace ChocoLuxAPI.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //modelBuilder.Entity<IdentityUserLogin<string>>()
-            //    .HasKey(l => new { l.LoginProvider, l.ProviderKey });
-            //modelBuilder.Entity<IdentityUserRole<string>>(userRole =>
-            //{
-            //    userRole.HasKey(ur => new { ur.UserId, ur.RoleId });
-            //});
-            //modelBuilder.Entity<IdentityUserToken<string>>(userToken =>
-            //{
-            //    userToken.HasKey(ut => new { ut.UserId, ut.LoginProvider, ut.Name });
-            //});
+            modelBuilder.Entity<IdentityUserLogin<string>>()
+                .HasKey(l => new { l.LoginProvider, l.ProviderKey });
+            modelBuilder.Entity<IdentityUserRole<string>>(userRole =>
+            {
+                userRole.HasKey(ur => new { ur.UserId, ur.RoleId });
+            });
+            modelBuilder.Entity<IdentityUserToken<string>>(userToken =>
+            {
+                userToken.HasKey(ut => new { ut.UserId, ut.LoginProvider, ut.Name });
+            });
 
             // Seed categories
             modelBuilder.Entity<Category>().HasData(

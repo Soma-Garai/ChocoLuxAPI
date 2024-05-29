@@ -1,13 +1,15 @@
-﻿using ChocoLuxAPI.ViewModels;
+﻿
+
+using ChocoLuxAPI.DTO;
 
 namespace ChocoLuxAPI.Models
 {
     public class CartItem
     {
         //public Guid CartItemId { get; set; }
-        public Guid CartItemId = Guid.NewGuid();
+        public Guid CartItemId { get; set; } = Guid.NewGuid();
         public int Quantity { get; set; }    // Quantity of the product
 
-        public ProductViewModel Product { get; set; } // The product in the cart
+        public ProductDto Product { get; set; } // The product in the cart
     }
 }

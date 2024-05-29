@@ -1,14 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
+﻿using ChocoLuxAPI.Models;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ChocoLuxAPI.Models
+namespace ChocoLuxAPI.DTO
 {
-    public class Product
+    public class ProductDto
     {
-        [Key]
-        public Guid ProductId { get; set; } = Guid.NewGuid(); // Auto-generate Id when a new product is created
+        //public Guid ProductId { get; set; }
         //public int product_id { get; set; }
-
         public string? ProductName { get; set; }
         public string? ProductDescription { get; set; }
         public int? ProductPrice { get; set; }
@@ -17,11 +15,11 @@ namespace ChocoLuxAPI.Models
         //This property is for the form file upload, so it's not mapped to the database
         [NotMapped]
         public IFormFile? ProductImage { get; set; }
-        public string? ProductImagePath { get; set; }
+        //public string? ProductImagePath { get; set; }
 
-        [ForeignKey("Category")]
+
         public Guid CategoryId { get; set; }      // Foreign key
-        public Category? Category { get; set; }  // Navigation property
+        /*public Category? category { get; set; }*/  // Navigation property
         public string? CategoryName { get; set; }
     }
 }

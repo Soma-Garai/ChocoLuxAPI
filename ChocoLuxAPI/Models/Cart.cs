@@ -1,12 +1,11 @@
-﻿using ChocoLuxAPI.ViewModels;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace ChocoLuxAPI.Models
 {
     public class Cart
     {
         //public int CartId { get; set; }
-        public Guid CartId = Guid.NewGuid();
+        public Guid CartId { get; set; } = Guid.NewGuid();
         public List<CartItem> Items { get; set; } = new List<CartItem>();
 
         //public void AddItem(ProductViewModel product, int quantity)

@@ -1,7 +1,7 @@
 ﻿using ChocoLuxAPI.Constants;
+using ChocoLuxAPI.DTO;
 using ChocoLuxAPI.Helpers;
 using ChocoLuxAPI.Models;
-using ChocoLuxAPI.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -24,21 +24,21 @@ namespace ChocoLuxAPI.Controllers
         public async Task<IActionResult> GetPermissions(string id)
         {
             // A new instance of PermissionViewModel is created to hold data for the view.
-            var model = new PermissionViewModel();
+            var model = new PermissionDto();
             // A new empty list of RoleClaimsViewModel objects is created to hold all permissions.
-            var allPermissions = new List<RoleClaimsViewModel>();
+            var allPermissions = new List<RoleClaimsDto>();
 
             // Permissions for the "Products" module are retrieved using the GeneratePermissionsForModule method from
             // the Permissions class. Each permission is converted into a RoleClaimsViewModel object and
             // added to the allPermissions list.
             var productsPermissions = Permissions<Product>.GeneratePermissionsForModule("Products")
-                                           .Select(permission => new RoleClaimsViewModel { Value = permission })
+                                           .Select(permission => new RoleClaimsDto { Value = permission })
                                            .ToList();
             allPermissions.AddRange(productsPermissions);
 
             // Retrieve permissions for the "Order" module
             var orderPermissions = Permissions<Orders>.GeneratePermissionsForModule("Orders")
-                                           .Select(permission => new RoleClaimsViewModel { Value = permission })
+                                           .Select(permission => new RoleClaimsDto { Value = permission })
                                            .ToList();
             allPermissions.AddRange(orderPermissions);
 
@@ -84,7 +84,7 @@ namespace ChocoLuxAPI.Controllers
         // Once the Admin maps new Permission to a selected user and clicks the Save Button,
         // the enabled permissions are added to the Role.
         [HttpPost("update")]
-        public async Task<IActionResult> Update([FromBody] PermissionViewModel model)
+        public async Task<IActionResult> Update([FromBody] PermissionDto model)
         {
             var role = await _roleManager.FindByIdAsync(model.RoleId);
             if (role == null)

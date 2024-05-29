@@ -1,9 +1,9 @@
-﻿namespace ChocoLuxAPI.ViewModels
+﻿namespace ChocoLuxAPI.DTO
 {
-    public class ManageUserRolesViewModel
+    public class ManageUserRolesDto
     {
         public string RoleId { get; set; }
         public string RoleName { get; set; }
         public bool Selected { get; set; }
-    }      
+    }
 }

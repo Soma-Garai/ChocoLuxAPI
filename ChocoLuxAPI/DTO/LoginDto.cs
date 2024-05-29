@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace ChocoLuxAPI.ViewModels
+namespace ChocoLuxAPI.DTO
 {
-    public class LoginViewModel
+    public class LoginDto
     {
         [Required]
         [Display(Name = "Email / Username")]

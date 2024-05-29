@@ -1,5 +1,5 @@
-﻿using ChocoLuxAPI.Models;
-using ChocoLuxAPI.ViewModels;
+﻿using ChocoLuxAPI.DTO;
+using ChocoLuxAPI.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -23,14 +23,14 @@ namespace ChocoLuxAPI.Controllers
         {
             // Retrieve products from the database along with categories 
             var productsWithCategories = _appDbContext.tblProducts
-                .Include(p => p.category) // Include category information
-                .Select(p => new ProductWithCategoryViewModel
+                .Include(p => p.Category) // Include category information
+                .Select(p => new ProductWithCategoryDto
                 {
                     //product_id = p.product_id,
-                    product_name = p.product_name,
-                    product_description = p.product_description,
-                    product_price = p.product_price,
-                    product_ImagePath = p.product_ImagePath,
+                    ProductName = p.ProductName,
+                    ProductDescription = p.ProductDescription,
+                    ProductPrice = p.ProductPrice,
+                    ProductImagePath = p.ProductImagePath,
                     CategoryId = p.CategoryId,
                     CategoryName = p.CategoryName // Assuming there's a property for CategoryName in Category entity
                 })
@@ -51,14 +51,14 @@ namespace ChocoLuxAPI.Controllers
         {
             // Retrieve products from the database along with categories 
             var productsWithCategories = _appDbContext.tblProducts
-                .Include(p => p.category) // Include category information
-                .Select(p => new ProductWithCategoryViewModel
+                .Include(p => p.Category) // Include category information
+                .Select(p => new ProductWithCategoryDto
                 {
                     //product_id = p.product_id,
-                    product_name = p.product_name,
-                    product_description = p.product_description,
-                    product_price = p.product_price,
-                    product_ImagePath = p.product_ImagePath,
+                    ProductName = p.ProductName,
+                    ProductDescription = p.ProductDescription,
+                    ProductPrice = p.ProductPrice,
+                    ProductImagePath = p.ProductImagePath,
                     CategoryId = p.CategoryId,
                     CategoryName = p.CategoryName // Assuming there's a property for CategoryName in Category entity
                 })

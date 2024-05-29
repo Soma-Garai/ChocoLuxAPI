@@ -1,7 +1,6 @@
-﻿namespace ChocoLuxAPI.ViewModels
+﻿namespace ChocoLuxAPI.DTO
 {
-    //holds information about the user and their roles
-    public class UserRolesViewModel
+    public class UserRolesDto
     {
         public string UserId { get; set; }
         public string FirstName { get; set; }

@@ -89,6 +89,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseStaticFiles(); // Add this line to enable static file serving
 app.UseRouting();
 // Enable CORS
 app.UseCors("AllowSpecificOrigin");

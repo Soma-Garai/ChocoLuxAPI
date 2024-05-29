@@ -1,5 +1,5 @@
-﻿using ChocoLuxAPI.Models;
-using ChocoLuxAPI.ViewModels;
+﻿using ChocoLuxAPI.DTO;
+using ChocoLuxAPI.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -23,7 +23,7 @@ namespace ChocoLuxAPI.Controllers
         public async Task<IActionResult> Index()
         {
             var users = await _userManager.Users.ToListAsync();
-            var userRolesViewModel = new List<UserRolesViewModel>();
+            var userRolesViewModel = new List<UserRolesDto>();
 
             foreach (UserModel user in users)
             {
@@ -31,7 +31,7 @@ namespace ChocoLuxAPI.Controllers
                 var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
                 if (!isAdmin)
                 {
-                    var thisViewModel = new UserRolesViewModel();
+                    var thisViewModel = new UserRolesDto();
                     thisViewModel.UserId = user.Id;
                     thisViewModel.Email = user.Email;
                     thisViewModel.FirstName = user.FirstName;
@@ -62,10 +62,10 @@ namespace ChocoLuxAPI.Controllers
                 return NotFound($"User with Id = {userId} cannot be found");
             }
 
-            var model = new List<ManageUserRolesViewModel>();
+            var model = new List<ManageUserRolesDto>();
             foreach (var role in _roleManager.Roles)
             {
-                var userRolesViewModel = new ManageUserRolesViewModel
+                var userRolesViewModel = new ManageUserRolesDto
                 {
                     RoleId = role.Id,
                     RoleName = role.Name
@@ -84,7 +84,7 @@ namespace ChocoLuxAPI.Controllers
         }
 
         [HttpPut("manage")]
-        public async Task<IActionResult> UpdateUserRoles(string userId, List<ManageUserRolesViewModel> model)
+        public async Task<IActionResult> UpdateUserRoles(string userId, List<ManageUserRolesDto> model)
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
