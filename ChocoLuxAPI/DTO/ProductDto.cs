@@ -5,8 +5,8 @@ namespace ChocoLuxAPI.DTO
 {
     public class ProductDto
     {
-        //public Guid ProductId { get; set; }
-        //public int product_id { get; set; }
+        public Guid ProductId = Guid.NewGuid();
+        
         public string? ProductName { get; set; }
         public string? ProductDescription { get; set; }
         public int? ProductPrice { get; set; }

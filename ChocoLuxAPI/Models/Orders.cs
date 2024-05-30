@@ -5,7 +5,7 @@ namespace ChocoLuxAPI.Models
     public class Orders
     {
         [Key]
-        public Guid OrderId { get; set; } = Guid.NewGuid();
+        public Guid OrderId { get; set; } 
         //public int OrderId { get; set; }
         public string UserId { get; set; }
         public DateTime OrderDate { get; set; }

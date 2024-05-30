@@ -6,7 +6,7 @@ namespace ChocoLuxAPI.Models
     public class Product
     {
         [Key]
-        public Guid ProductId { get; set; } = Guid.NewGuid(); // Auto-generate Id when a new product is created
+        public Guid ProductId { get; set; } // Auto-generate Id when a new product is created
         //public int product_id { get; set; }
 
         public string? ProductName { get; set; }

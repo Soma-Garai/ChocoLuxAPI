@@ -6,7 +6,7 @@ namespace ChocoLuxAPI.Models
     public class OrderDetails
     {
         [Key]
-        public Guid OrderItemId { get; set; } = Guid.NewGuid(); // Primary Key 
+        public Guid OrderItemId { get; set; }// Primary Key 
         //[Foreign Key to tblOrders]
         public Guid ProductId { get; set; } // [Foreign Key to tblProducts]
         public string? ProductName { get; set; }
