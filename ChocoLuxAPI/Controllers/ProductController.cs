@@ -31,7 +31,8 @@ namespace ChocoLuxAPI.Controllers
                     ProductName = p.ProductName,
                     ProductDescription = p.ProductDescription,
                     ProductPrice = p.ProductPrice,
-                    ProductImagePath = p.ProductImagePath,
+                    //ProductImagePath = p.ProductImagePath,
+                    ProductImagePath = $"{Request.Scheme}://{Request.Host}{p.ProductImagePath}", // Construct absolute URL
                     CategoryId = p.CategoryId,
                     CategoryName = p.CategoryName // Assuming there's a property for CategoryName in Category entity
                 })
@@ -77,6 +78,7 @@ namespace ChocoLuxAPI.Controllers
 
             Product model = new Product
             {
+                //ProductId = Guid.NewGuid(),
                 ProductName = productDto.ProductName,
                 ProductDescription = productDto.ProductDescription,
                 ProductPrice = productDto.ProductPrice,

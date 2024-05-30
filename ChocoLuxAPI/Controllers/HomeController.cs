@@ -17,6 +17,7 @@ namespace ChocoLuxAPI.Controllers
             _logger = logger;
             _appDbContext = appDbContext;
         }
+
         [HttpGet]
         [Route("index")]  //allProducts
         public IActionResult Index()
@@ -30,7 +31,8 @@ namespace ChocoLuxAPI.Controllers
                     ProductName = p.ProductName,
                     ProductDescription = p.ProductDescription,
                     ProductPrice = p.ProductPrice,
-                    ProductImagePath = p.ProductImagePath,
+                    //ProductImagePath = p.ProductImagePath,
+                    ProductImagePath = $"{Request.Scheme}://{Request.Host}{p.ProductImagePath}", // Construct absolute URL
                     CategoryId = p.CategoryId,
                     CategoryName = p.CategoryName // Assuming there's a property for CategoryName in Category entity
                 })
@@ -58,7 +60,7 @@ namespace ChocoLuxAPI.Controllers
                     ProductName = p.ProductName,
                     ProductDescription = p.ProductDescription,
                     ProductPrice = p.ProductPrice,
-                    ProductImagePath = p.ProductImagePath,
+                    ProductImagePath = $"{Request.Scheme}://{Request.Host}{p.ProductImagePath}",
                     CategoryId = p.CategoryId,
                     CategoryName = p.CategoryName // Assuming there's a property for CategoryName in Category entity
                 })
