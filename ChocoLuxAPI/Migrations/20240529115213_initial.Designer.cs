@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ChocoLuxAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240527055450_initial with guid")]
-    partial class initialwithguid
+    [Migration("20240529115213_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -77,13 +77,13 @@ namespace ChocoLuxAPI.Migrations
                     b.Property<string>("ProductName")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("ProductPrice")
+                        .HasColumnType("int");
+
                     b.Property<int?>("Quantity")
                         .HasColumnType("int");
 
                     b.Property<int?>("TotalPrice")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("product_price")
                         .HasColumnType("int");
 
                     b.HasKey("OrderItemId");
@@ -119,7 +119,7 @@ namespace ChocoLuxAPI.Migrations
 
             modelBuilder.Entity("ChocoLuxAPI.Models.Product", b =>
                 {
-                    b.Property<Guid>("product_id")
+                    b.Property<Guid>("ProductId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
@@ -129,19 +129,19 @@ namespace ChocoLuxAPI.Migrations
                     b.Property<string>("CategoryName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("product_ImagePath")
+                    b.Property<string>("ProductDescription")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("product_description")
+                    b.Property<string>("ProductImagePath")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("product_name")
+                    b.Property<string>("ProductName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("product_price")
+                    b.Property<int?>("ProductPrice")
                         .HasColumnType("int");
 
-                    b.HasKey("product_id");
+                    b.HasKey("ProductId");
 
                     b.HasIndex("CategoryId");
 

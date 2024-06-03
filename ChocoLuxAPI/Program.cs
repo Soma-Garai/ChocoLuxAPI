@@ -16,7 +16,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin",
         builder => builder
-            .WithOrigins("https://localhost:7170") // Add the URL of your frontend application
+            .WithOrigins("https://localhost:7183") // Add the URL of your frontend application
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials());
@@ -37,7 +37,11 @@ builder.Services.AddSwaggerGen();
 var userManager = builder.Services.AddScoped<UserManager<UserModel>>();
 var roleManager = builder.Services.AddScoped<SignInManager<UserModel>>();
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
         .AddJwtBearer(options =>
         {
             options.TokenValidationParameters = new TokenValidationParameters
@@ -51,7 +55,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["jwt:secretKey"])) // Your secret key for signing tokens
             };
         });
-//builder.Services.AddAuthorization();
+builder.Services.AddAuthorization();
 //builder.Services.AddAuthorization(options =>
 //{
 //    options.AddPolicy("AdminPolicy", policy =>

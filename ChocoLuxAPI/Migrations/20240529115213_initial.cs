@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ChocoLuxAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class initialwithguid : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -40,6 +40,33 @@ namespace ChocoLuxAPI.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Roles", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "tblCategories",
+                columns: table => new
+                {
+                    CategoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CategoryName = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_tblCategories", x => x.CategoryId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "tblOrders",
+                columns: table => new
+                {
+                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    OrderDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    TotalPrice = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_tblOrders", x => x.OrderId);
                 });
 
             migrationBuilder.CreateTable(
@@ -84,20 +111,6 @@ namespace ChocoLuxAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserTokens",
-                columns: table => new
-                {
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Value = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserTokens", x => new { x.UserId, x.LoginProvider, x.Name });
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
@@ -125,47 +138,34 @@ namespace ChocoLuxAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "tblCategories",
+                name: "UserTokens",
                 columns: table => new
                 {
-                    CategoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CategoryName = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Value = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_tblCategories", x => x.CategoryId);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "tblOrders",
-                columns: table => new
-                {
-                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    OrderDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false),
-                    TotalPrice = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_tblOrders", x => x.OrderId);
+                    table.PrimaryKey("PK_UserTokens", x => new { x.UserId, x.LoginProvider, x.Name });
                 });
 
             migrationBuilder.CreateTable(
                 name: "tblProducts",
                 columns: table => new
                 {
-                    product_id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    product_name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    product_description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    product_price = table.Column<int>(type: "int", nullable: true),
-                    product_ImagePath = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ProductName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ProductDescription = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ProductPrice = table.Column<int>(type: "int", nullable: true),
+                    ProductImagePath = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CategoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CategoryName = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_tblProducts", x => x.product_id);
+                    table.PrimaryKey("PK_tblProducts", x => x.ProductId);
                     table.ForeignKey(
                         name: "FK_tblProducts_tblCategories_CategoryId",
                         column: x => x.CategoryId,
@@ -182,7 +182,7 @@ namespace ChocoLuxAPI.Migrations
                     ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ProductName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Quantity = table.Column<int>(type: "int", nullable: true),
-                    product_price = table.Column<int>(type: "int", nullable: true),
+                    ProductPrice = table.Column<int>(type: "int", nullable: true),
                     TotalPrice = table.Column<int>(type: "int", nullable: true),
                     OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
@@ -229,6 +229,12 @@ namespace ChocoLuxAPI.Migrations
                 name: "Roles");
 
             migrationBuilder.DropTable(
+                name: "tblOrderDetails");
+
+            migrationBuilder.DropTable(
+                name: "tblProducts");
+
+            migrationBuilder.DropTable(
                 name: "UserClaims");
 
             migrationBuilder.DropTable(
@@ -238,16 +244,10 @@ namespace ChocoLuxAPI.Migrations
                 name: "UserRoles");
 
             migrationBuilder.DropTable(
-                name: "UserTokens");
-
-            migrationBuilder.DropTable(
                 name: "Users");
 
             migrationBuilder.DropTable(
-                name: "tblOrderDetails");
-
-            migrationBuilder.DropTable(
-                name: "tblProducts");
+                name: "UserTokens");
 
             migrationBuilder.DropTable(
                 name: "tblOrders");
