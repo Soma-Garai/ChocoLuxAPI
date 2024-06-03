@@ -1,10 +1,12 @@
-﻿using ChocoLuxAPI.Models;
+﻿using ChocoLuxAPI.DTO;
+using ChocoLuxAPI.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 
 namespace ChocoLuxAPI.Services
 {  
@@ -18,7 +20,7 @@ namespace ChocoLuxAPI.Services
             _userManager = userManager;
         }
 
-        public async Task<string> GenerateToken(UserModel user)
+        public async Task<string> GenerateToken(UserModel user, List<Claim> additionalClaims=null)
         {
             if (user == null)
             {
@@ -46,6 +48,10 @@ namespace ChocoLuxAPI.Services
                     authClaims.Add(new Claim(ClaimTypes.Role, role));
                 }
             }
+            if (additionalClaims != null)
+            {
+                authClaims.AddRange(additionalClaims);
+            }
             //creating the token with JwtSecurityToken
             var token = new JwtSecurityToken(
                     issuer: _configuration["jwt:validIssuer"],
@@ -56,6 +62,21 @@ namespace ChocoLuxAPI.Services
                     );
 
             return await Task.FromResult(new JwtSecurityTokenHandler().WriteToken(token));
-        }     
+        }
+
+        public async Task<string> GenerateCartJwt(UserModel user, List<CartItemDto> cartItems)
+        {
+            var cartClaim = new Claim("cart", JsonSerializer.Serialize(cartItems));
+            return await GenerateToken(user, new List<Claim> { cartClaim });
+        }
+
+        public List<CartItemDto> DecodeCartJwt(string token)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadJwtToken(token);
+            var cartClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "cart")?.Value;
+
+            return cartClaim != null ? JsonSerializer.Deserialize<List<CartItemDto>>(cartClaim) : new List<CartItemDto>();
+        }
     }
 }

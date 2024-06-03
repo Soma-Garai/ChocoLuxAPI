@@ -3,6 +3,7 @@ using ChocoLuxAPI.Permission;
 using ChocoLuxAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -37,9 +38,16 @@ builder.Services.AddSwaggerGen();
 var userManager = builder.Services.AddScoped<UserManager<UserModel>>();
 var roleManager = builder.Services.AddScoped<SignInManager<UserModel>>();
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+var key = Encoding.ASCII.GetBytes(configuration["Jwt:secretKey"]);
+builder.Services.AddAuthentication(x =>
+{
+    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
         .AddJwtBearer(options =>
         {
+            options.RequireHttpsMetadata = false;
+            options.SaveToken = true;
             options.TokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = true,
@@ -51,6 +59,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["jwt:secretKey"])) // Your secret key for signing tokens
             };
         });
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+//builder.Services.AddScoped<CartService>();
 //builder.Services.AddAuthorization();
 //builder.Services.AddAuthorization(options =>
 //{

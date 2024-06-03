@@ -4,7 +4,9 @@ using ChocoLuxAPI.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using System.Net.Mail;
+using System.Security.Claims;
 
 namespace ChocoLuxAPI.Controllers
 {
@@ -72,7 +74,7 @@ namespace ChocoLuxAPI.Controllers
             }
 
             // Generates a JWT token for the authenticated user
-            var token = await _tokenGenerator.GenerateToken(user);
+            var token = await _tokenGenerator.GenerateToken(user, null);
 
             // Returns an Ok response with the generated JWT token
             return Ok(token);

@@ -1,5 +1,6 @@
 ﻿using ChocoLuxAPI.DTO;
 using ChocoLuxAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +9,7 @@ namespace ChocoLuxAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [AllowAnonymous]
     public class HomeController : ControllerBase
     {
         private readonly ILogger<HomeController> _logger;
