@@ -15,10 +15,35 @@ namespace ChocoLuxAPI.Models
         public DbSet<Category> tblCategories { get; set; }
         public DbSet<Orders> tblOrders { get; set; }
         public DbSet<OrderDetails> tblOrderDetails { get; set; }
-
+        public DbSet<Cart> tblCart { get; set; }
+        public DbSet<CartItem> tblCartItems { get; set; }
+        public DbSet<Session> tblSession { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            //modelBuilder.Entity<Cart>()
+            //.HasMany(c => c.Items)
+            //.WithOne(ci => ci.Cart)
+            //.HasForeignKey(ci => ci.CartId);
+
+            // Configure primary keys
+            modelBuilder.Entity<Session>().HasKey(s => s.SessionId);
+            modelBuilder.Entity<Cart>().HasKey(c => c.CartId);
+            modelBuilder.Entity<CartItem>().HasKey(ci => ci.CartItemId);
+
+            // Configure foreign key relationships
+            modelBuilder.Entity<Session>()
+                .HasMany(s => s.Carts)
+                .WithOne(c => c.Session)
+                .HasForeignKey(c => c.SessionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Cart>()
+                .HasMany(c => c.CartItem)
+                .WithOne(ci => ci.Cart)
+                .HasForeignKey(ci => ci.CartId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             modelBuilder.Entity<IdentityUserLogin<string>>()
                 .HasKey(l => new { l.LoginProvider, l.ProviderKey });
             modelBuilder.Entity<IdentityUserRole<string>>(userRole =>
