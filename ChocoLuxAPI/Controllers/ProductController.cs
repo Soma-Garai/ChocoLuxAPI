@@ -10,12 +10,14 @@ namespace ChocoLuxAPI.Controllers
     [ApiController]
     public class ProductController : ControllerBase
     {
+        private readonly ILogger<ProductController> _logger;
         private readonly AppDbContext _context;
         private readonly IWebHostEnvironment _hostEnvironment;
-        public ProductController(AppDbContext context, IWebHostEnvironment hostEnvironment)
+        public ProductController(AppDbContext context, IWebHostEnvironment hostEnvironment, ILogger<ProductController> logger)
         {
             _context = context;
             _hostEnvironment = hostEnvironment;
+            _logger = logger;
         }
 
         [HttpGet]

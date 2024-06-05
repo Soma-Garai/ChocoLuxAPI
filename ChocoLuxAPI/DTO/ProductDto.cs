@@ -14,7 +14,7 @@ namespace ChocoLuxAPI.DTO
 
         //This property is for the form file upload, so it's not mapped to the database
         [NotMapped]
-        public IFormFile? ProductImage { get; set; }
+        public IFormFile? ProductImage;
         //public string? ProductImagePath { get; set; }
 
 

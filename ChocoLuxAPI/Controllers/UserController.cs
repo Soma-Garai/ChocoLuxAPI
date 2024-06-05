@@ -4,6 +4,7 @@ using ChocoLuxAPI.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Net.Mail;
 using System.Security.Claims;
@@ -74,10 +75,24 @@ namespace ChocoLuxAPI.Controllers
             }
 
             // Generates a JWT token for the authenticated user
-            var token = await _tokenGenerator.GenerateToken(user, null);
+            var token = await _tokenGenerator.GenerateToken(user);
+
+            // Create a new session for the authenticated user
+            var session = new Session
+            {
+                SessionId = Guid.NewGuid(),
+                UserId = user.Id, // Assuming user.Id is the user's unique identifier
+                CreatedAt = DateTime.UtcNow,
+                ExpiresAt = DateTime.UtcNow.AddHours(1) // Example session duration
+            };
+
+            _appDbContext.TblSession.Add(session);
+            await _appDbContext.SaveChangesAsync();
+            // Returns an Ok response with the generated JWT token and SessionId
+            return Ok(new { Token = token, SessionId = session.SessionId });
 
             // Returns an Ok response with the generated JWT token
-            return Ok(token);
+            //return Ok(token);
         }
 
         [HttpPost("Logout")]

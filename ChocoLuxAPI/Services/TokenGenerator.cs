@@ -1,6 +1,7 @@
 ﻿using ChocoLuxAPI.DTO;
 using ChocoLuxAPI.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -20,11 +21,12 @@ namespace ChocoLuxAPI.Services
             _userManager = userManager;
         }
 
-        public async Task<string> GenerateToken(UserModel user, List<Claim> additionalClaims=null)
+        [HttpPost]
+        public async Task<string> GenerateToken(UserModel user /*List<Claim> additionalClaims=null*/)
         {
             if (user == null)
             {
-                return string.Empty;
+                throw new ArgumentNullException(nameof(user), "User cannot be null");
             }
 
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["jwt:secretKey"]));
@@ -48,10 +50,10 @@ namespace ChocoLuxAPI.Services
                     authClaims.Add(new Claim(ClaimTypes.Role, role));
                 }
             }
-            if (additionalClaims != null)
-            {
-                authClaims.AddRange(additionalClaims);
-            }
+            //if (additionalClaims != null)
+            //{
+            //    authClaims.AddRange(additionalClaims);
+            //}
             //creating the token with JwtSecurityToken
             var token = new JwtSecurityToken(
                     issuer: _configuration["jwt:validIssuer"],
@@ -67,7 +69,7 @@ namespace ChocoLuxAPI.Services
         public async Task<string> GenerateCartJwt(UserModel user, List<CartItemDto> cartItems)
         {
             var cartClaim = new Claim("cart", JsonSerializer.Serialize(cartItems));
-            return await GenerateToken(user, new List<Claim> { cartClaim });
+            return await GenerateToken(user/*, new List<Claim> { cartClaim }*/);
         }
 
         public List<CartItemDto> DecodeCartJwt(string token)

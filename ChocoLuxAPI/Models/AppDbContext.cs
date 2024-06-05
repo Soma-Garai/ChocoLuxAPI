@@ -15,9 +15,9 @@ namespace ChocoLuxAPI.Models
         public DbSet<Category> tblCategories { get; set; }
         public DbSet<Orders> tblOrders { get; set; }
         public DbSet<OrderDetails> tblOrderDetails { get; set; }
-        public DbSet<Cart> tblCart { get; set; }
-        public DbSet<CartItem> tblCartItems { get; set; }
-        public DbSet<Session> tblSession { get; set; }
+        public DbSet<Cart> TblCart { get; set; }
+        public DbSet<CartItem> TblCartItems { get; set; }
+        public DbSet<Session> TblSession { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -39,7 +39,7 @@ namespace ChocoLuxAPI.Models
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Cart>()
-                .HasMany(c => c.CartItem)
+                .HasMany(c => c.CartItems)
                 .WithOne(ci => ci.Cart)
                 .HasForeignKey(ci => ci.CartId)
                 .OnDelete(DeleteBehavior.Cascade);
