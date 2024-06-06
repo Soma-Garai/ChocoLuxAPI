@@ -8,6 +8,6 @@
         public string? ProductDescription { get; set; }
         public int Quantity { get; set; }
         public int? ProductPrice { get; set; }
-        public int? TotalPrice { get; set; }
+        public int? TotalPrice;
     }
 }

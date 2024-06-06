@@ -58,7 +58,7 @@ namespace ChocoLuxAPI.Services
             var token = new JwtSecurityToken(
                     issuer: _configuration["jwt:validIssuer"],
                     audience: _configuration["jwt:validAudience"],
-                    expires: DateTime.Now.AddHours(1),
+                    expires: DateTime.Now.AddHours(12),
                     claims: authClaims,
                     signingCredentials: credentials
                     );

@@ -20,14 +20,15 @@ namespace ChocoLuxAPI.Controllers
         private readonly AppDbContext _appDbContext;
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly TokenGenerator _tokenGenerator;
-
-        public UserController(SignInManager<UserModel> signInManager, UserManager<UserModel> userManager, AppDbContext appDbContext, IHttpContextAccessor contextAccessor, TokenGenerator tokenGenerator)
+        private readonly ILogger<UserController> _logger;
+        public UserController(SignInManager<UserModel> signInManager, UserManager<UserModel> userManager, AppDbContext appDbContext, IHttpContextAccessor contextAccessor, TokenGenerator tokenGenerator, ILogger<UserController> logger)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _appDbContext = appDbContext;
             _contextAccessor = contextAccessor;
             _tokenGenerator = tokenGenerator;
+            _logger = logger;
         }
 
         [HttpPost("Register")]
@@ -96,10 +97,21 @@ namespace ChocoLuxAPI.Controllers
         }
 
         [HttpPost("Logout")]
-        public async Task<IActionResult> Logout()
+        public async Task<IActionResult> Logout([FromHeader]Guid SessionId)
         {
+            //var user = await _userManager.GetUserAsync(User);
+            // Find the active session for the user
+            var session = await _appDbContext.TblSession.FirstOrDefaultAsync(s => s.SessionId == SessionId /*&& s.ExpiresAt > DateTime.UtcNow*/);
+            if (session != null)
+            {
+                // Invalidate the session by setting ExpiresAt to the current time
+                session.ExpiresAt = DateTime.UtcNow;
+                await _appDbContext.SaveChangesAsync();
+            }
             await _signInManager.SignOutAsync();
-            return Ok("Logout successful.");
+
+            _logger.LogInformation("User {UserId} logged out and session invalidated", session.UserId);
+            return Ok("User logged out successfully");
         }
 
         private bool IsValidEmail(string emailaddress)

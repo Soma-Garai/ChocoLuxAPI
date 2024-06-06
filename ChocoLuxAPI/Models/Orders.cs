@@ -6,7 +6,6 @@ namespace ChocoLuxAPI.Models
     {
         [Key]
         public Guid OrderId { get; set; } 
-        //public int OrderId { get; set; }
         public string UserId { get; set; }
         public DateTime OrderDate { get; set; }
         public OrderStatus Status { get; set; }  // Added OrderStatus property

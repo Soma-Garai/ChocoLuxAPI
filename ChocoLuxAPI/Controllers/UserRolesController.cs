@@ -19,6 +19,7 @@ namespace ChocoLuxAPI.Controllers
             _roleManager = roleManager;
             _userManager = userManager;
         }
+        //To show the user with their assigned roles in a table
         [HttpGet("users")]
         public async Task<IActionResult> Index()
         {
@@ -53,6 +54,7 @@ namespace ChocoLuxAPI.Controllers
             //return roles.Where(role => role != "Admin").ToList();
         }
 
+        //to modify/manage roles of each user
         [HttpGet("manage")]
         public async Task<IActionResult> Manage(string userId)
         {
@@ -83,6 +85,7 @@ namespace ChocoLuxAPI.Controllers
             return Ok(model);
         }
 
+        //UPDATE method for user role
         [HttpPut("manage")]
         public async Task<IActionResult> UpdateUserRoles(string userId, List<ManageUserRolesDto> model)
         {
@@ -105,7 +108,7 @@ namespace ChocoLuxAPI.Controllers
                 return BadRequest("Cannot add selected roles to user");
             }
 
-            return Ok();
+            return Ok("The user is updated with the Role");
         }
 
     }

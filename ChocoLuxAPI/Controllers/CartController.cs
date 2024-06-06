@@ -30,24 +30,26 @@ namespace ChocoLuxAPI.Controllers
         }
 
         [HttpPost("AddItemToCart")]
-        public async Task<IActionResult> AddItemToCart([FromHeader] Guid sessionId, [FromBody] CartItemDto cartItemDto)
+        public async Task<IActionResult> AddItemToCart([FromHeader] Guid sessionId, [FromBody] List<CartItemDto> cartItemsDto)
         {
             // Get user ID from claims
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null)
-            {
-                return Unauthorized("User not authenticated");
-            }
+            //var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            //if (userId == null)
+            //{
+            //    return Unauthorized("User not authenticated");
+            //}
             //var user = await _userManager.GetUserAsync(User); // Assuming you are using ASP.NET Identity
             //if (user == null)
             //{
             //    return Unauthorized();
             //}
 
-            // Log the session ID and user ID
-            //_logger.LogInformation($"User ID: {user.Id}, Session ID: {sessionId}");
+            
             // Check if the session is valid
             var session = await _appDbContext.TblSession.FirstOrDefaultAsync(s => s.SessionId == sessionId);
+            var userId = session?.UserId;
+            // Log the session ID and user ID
+            _logger.LogInformation($"User ID: {userId}, Session ID: {sessionId}");
             if (session == null || session.ExpiresAt < DateTime.UtcNow)
             {
                 return Unauthorized("Invalid or expired session");
@@ -70,24 +72,26 @@ namespace ChocoLuxAPI.Controllers
                 _appDbContext.TblCart.Add(cart);
             }
 
-            // Add the new item to the cart
-            var cartItem = new CartItem
+            foreach(var cartItemDto in cartItemsDto)
             {
-                CartItemId = Guid.NewGuid(),
-                CartId = cart.CartId,
-                ProductId = cartItemDto.ProductId,
-                Quantity = cartItemDto.Quantity,
-                ProductPrice = cartItemDto.ProductPrice,
-                TotalPrice = cartItemDto.TotalPrice * cartItemDto.Quantity,
-                CreatedAt = DateTime.UtcNow
-            };
-            cart.CartItems.Add(cartItem);
-
+                // Add the new item to the cart
+                var cartItem = new CartItem
+                {
+                    CartItemId = Guid.NewGuid(),
+                    CartId = cart.CartId,
+                    ProductId = cartItemDto.ProductId,
+                    Quantity = cartItemDto.Quantity,
+                    ProductPrice = cartItemDto.ProductPrice,
+                    TotalPrice = cartItemDto.TotalPrice * cartItemDto.Quantity,
+                    CreatedAt = DateTime.UtcNow
+                };
+                cart.CartItems.Add(cartItem);
+                _logger.LogInformation("Added item to cart: {CartItemId}", cartItem.CartItemId);
+            }
             await _appDbContext.SaveChangesAsync();
-            _logger.LogInformation("Added item to cart: {CartItemId}", cartItem.CartItemId);
-            return Ok();
+            return Ok("The Items are successfully added to the Cart");
         }
-
+         
 
         [HttpGet]
         public IActionResult GetCartItems()
