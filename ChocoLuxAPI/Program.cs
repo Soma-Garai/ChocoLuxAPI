@@ -52,8 +52,7 @@ builder.Services.AddAuthentication(options =>
                 ValidateIssuerSigningKey = true,
                 ValidIssuer = configuration["jwt:validIssuer"], // The issuer of the token
                 ValidAudience = configuration["jwt:validAudience"], // The audience of the token
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["jwt:secretKey"])), // Your secret key for signing tokens
-                ClockSkew = TimeSpan.Zero, // Set the clock skew to zero to mitigate issues with token expiration               
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["jwt:secretKey"])), // Your secret key for signing tokens              
             };
         });
 builder.Services.AddAuthorization();

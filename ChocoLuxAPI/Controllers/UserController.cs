@@ -78,39 +78,18 @@ namespace ChocoLuxAPI.Controllers
             // Generates a JWT token for the authenticated user
             var token = await _tokenGenerator.GenerateToken(user);
 
-            // Create a new session for the authenticated user
-            var session = new Session
-            {
-                SessionId = Guid.NewGuid(),
-                UserId = user.Id, // Assuming user.Id is the user's unique identifier
-                CreatedAt = DateTime.UtcNow,
-                ExpiresAt = DateTime.UtcNow.AddHours(1) // Example session duration
-            };
-
-            _appDbContext.TblSession.Add(session);
             await _appDbContext.SaveChangesAsync();
             // Returns an Ok response with the generated JWT token and SessionId
-            return Ok(new { Token = token, SessionId = session.SessionId });
-
-            // Returns an Ok response with the generated JWT token
-            //return Ok(token);
+            return Ok(new { Token = token});
         }
 
         [HttpPost("Logout")]
-        public async Task<IActionResult> Logout([FromHeader]Guid SessionId)
+        public async Task<IActionResult> Logout()
         {
-            //var user = await _userManager.GetUserAsync(User);
-            // Find the active session for the user
-            var session = await _appDbContext.TblSession.FirstOrDefaultAsync(s => s.SessionId == SessionId /*&& s.ExpiresAt > DateTime.UtcNow*/);
-            if (session != null)
-            {
-                // Invalidate the session by setting ExpiresAt to the current time
-                session.ExpiresAt = DateTime.UtcNow;
-                await _appDbContext.SaveChangesAsync();
-            }
+            var user = await _userManager.GetUserAsync(User);
             await _signInManager.SignOutAsync();
 
-            _logger.LogInformation("User {UserId} logged out and session invalidated", session.UserId);
+            _logger.LogInformation("User {UserId} logged out", user.Id);
             return Ok("User logged out successfully");
         }
 
