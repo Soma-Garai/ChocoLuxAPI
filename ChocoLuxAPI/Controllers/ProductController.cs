@@ -1,5 +1,6 @@
 ﻿using ChocoLuxAPI.DTO;
 using ChocoLuxAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +9,7 @@ namespace ChocoLuxAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [AllowAnonymous]
     public class ProductController : ControllerBase
     {
         private readonly ILogger<ProductController> _logger;
@@ -42,6 +44,28 @@ namespace ChocoLuxAPI.Controllers
             //ViewBag.ProductsWithCategories = productsWithCategories;
             return Ok(productsWithCategories);
         }
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetProductById(Guid id)
+        {
+            _logger.LogInformation("GetProductById method started with ID: {Id}", id);
+
+            try
+            {
+                var product = await _context.tblProducts.FindAsync(id);
+                if (product == null)
+                {
+                    _logger.LogWarning("Product not found with ID: {Id}", id);
+                    return NotFound();
+                }
+
+                return Ok(product);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while fetching the product with ID: {Id}", id);
+                return StatusCode(500, "Internal server error");
+            }
+        }
 
         [HttpPost("AddProduct")]
         public async Task<IActionResult> AddProduct([FromForm] ProductDto productDto)
@@ -57,7 +81,7 @@ namespace ChocoLuxAPI.Controllers
             if (productDto.ProductImage != null)
             {
                 string folder = "images/";
-                string uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(productDto.ProductImage.FileName);
+                string uniqueFileName = Guid.NewGuid().ToString() + productDto.ProductImage.FileName;
                 string relativePath = Path.Combine(folder, uniqueFileName); // Use Path.Combine for relative path
                 productImagePath = "/" + relativePath;
 
@@ -87,7 +111,7 @@ namespace ChocoLuxAPI.Controllers
                 ProductImagePath = productImagePath, // Correct path to be stored in the database
                 CategoryId = productDto.CategoryId,
                 CategoryName = productDto.CategoryName
-            };
+            };//categories.FirstOrDefault(c => c.CategoryId == model.CategoryId);
 
             // Add the new product to the database
             _context.tblProducts.Add(model);
@@ -99,27 +123,35 @@ namespace ChocoLuxAPI.Controllers
         [HttpGet("EditProduct/{id}")]  //just return the product details based on selected id
         public async Task<IActionResult> EditProduct(Guid id)
         {
-            if (!ModelState.IsValid)
+            _logger.LogInformation("GetProductById method started with ID: {Id}", id);
+
+            try
             {
-                return BadRequest(ModelState);
+                var product = await _context.tblProducts.FindAsync(id);
+                if (product == null)
+                {
+                    _logger.LogWarning("Product not found with ID: {Id}", id);
+                    return NotFound();
+                }
+
+                return Ok(product);
             }
-            var product = await _context.tblProducts.FindAsync(id);
-            if (product == null)
+            catch (Exception ex)
             {
-                return BadRequest("Product not found");
+                _logger.LogError(ex, "An error occurred while fetching the product with ID: {Id}", id);
+                return StatusCode(500, "Internal server error");
             }
-            return Ok(product);
         }
 
         [HttpPut("UpdateProduct/{id}")]
-        public async Task<IActionResult> UpdateProduct(Guid id, [FromForm] ProductDto productDto)
+        public async Task<IActionResult> UpdateProduct(Guid ProductId, [FromForm] ProductDto productDto)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var product = await _context.tblProducts.FindAsync(id);
+            var product = await _context.tblProducts.FindAsync(ProductId);
             if (product == null)
             {
                 return NotFound("Product not found.");
@@ -167,6 +199,7 @@ namespace ChocoLuxAPI.Controllers
 
             return Ok("Product updated successfully.");
         }
+
 
         [HttpDelete("DeleteProduct/{id}")]
         public async Task<IActionResult> DeleteProduct(Guid id)

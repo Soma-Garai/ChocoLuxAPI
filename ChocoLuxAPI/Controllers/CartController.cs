@@ -112,7 +112,6 @@ namespace ChocoLuxAPI.Controllers
         }
 
 
-
         [HttpGet("GetCartItems")]
         public async Task<IActionResult> GetCartItems([FromHeader] Guid sessionId)
         {
@@ -123,7 +122,7 @@ namespace ChocoLuxAPI.Controllers
                 return Unauthorized("Invalid or expired session");
             }
 
-            // Find the cart for the session
+            // this query is used to fetch the cart and its items based on the user's session ID
             var cart = await _appDbContext.TblCart
                 .Include(c => c.CartItems)
                 .FirstOrDefaultAsync(c => c.SessionId == sessionId);
@@ -137,8 +136,6 @@ namespace ChocoLuxAPI.Controllers
             var cartItemsDto = cart.CartItems.Select(ci => new CartItemDto
             {
                 ProductId = ci.ProductId,
-                ProductName=ci.ProductName,
-                ProductDescription=ci.ProductDescription,
                 Quantity = ci.Quantity,
                 ProductPrice = ci.ProductPrice,
                 TotalPrice = ci.TotalPrice
@@ -179,92 +176,43 @@ namespace ChocoLuxAPI.Controllers
             return Ok(new { Message = "Item removed from cart" });
         }
 
+        [HttpPut("UpdateCartItem")]
+        public async Task<IActionResult> UpdateCartItem([FromHeader] Guid sessionId, [FromBody] CartItemDto cartItemDto)
+        {
+            // Check if the session is valid
+            var session = await _appDbContext.TblSession.FirstOrDefaultAsync(s => s.SessionId == sessionId);
+            if (session == null)
+            {
+                return Unauthorized("Invalid or expired session");
+            }
+
+            // // this query is used to fetch the cart and its items based on the user's session ID
+            var cart = await _appDbContext.TblCart
+                .Include(c => c.CartItems)
+                .FirstOrDefaultAsync(c => c.SessionId == sessionId);
+
+            if (cart == null)
+            {
+                return NotFound("Cart not found");
+            }
+
+            // Find the item to update
+            var cartItem = cart.CartItems.FirstOrDefault(ci => ci.ProductId == cartItemDto.ProductId);
+            if (cartItem == null)
+            {
+                return NotFound("Cart item not found");
+            }
+
+            // Update the cart item
+            cartItem.Quantity = cartItemDto.Quantity;
+            cartItem.ProductPrice = cartItemDto.ProductPrice;
+            cartItem.TotalPrice = (cartItemDto.ProductPrice ?? 0) * cartItemDto.Quantity;
+
+            await _appDbContext.SaveChangesAsync();
+            _logger.LogInformation("Updated item in cart: {CartItemId}", cartItem.CartItemId);
+            return Ok("Item updated successfully");
+        }
+
 
     }
 }
-//[HttpPost("AddItemToCart")]
-//public async Task<IActionResult> AddItemToCart([FromHeader] Guid sessionId, [FromBody] List<CartItemDto> cartItemsDto)
-//{
-//    // Get user ID from claims
-//    //var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-//    //if (userId == null)
-//    //{
-//    //    return Unauthorized("User not authenticated");
-//    //}
-//    //var user = await _userManager.GetUserAsync(User); // Assuming you are using ASP.NET Identity
-//    //if (user == null)
-//    //{
-//    //    return Unauthorized();
-//    //}
-
-
-//    // Check if the session is valid
-//    var session = await _appDbContext.TblSession.FirstOrDefaultAsync(s => s.SessionId == sessionId);
-//    var userId = session?.UserId;
-//    // Log the session ID and user ID
-//    _logger.LogInformation($"User ID: {userId}, Session ID: {sessionId}");
-//    if (session == null || session.ExpiresAt < DateTime.UtcNow)
-//    {
-//        return Unauthorized("Invalid or expired session");
-//    }
-
-//    // Find or create a cart for the session
-//    var cart = await _appDbContext.TblCart
-//        .Include(c => c.CartItems)
-//        .FirstOrDefaultAsync(c => c.SessionId == sessionId);
-
-//    if (cart == null)
-//    {
-//        cart = new Cart
-//        {
-//            CartId = Guid.NewGuid(),
-//            SessionId = sessionId,
-//            UserId = session.UserId
-//        };
-
-//        _appDbContext.TblCart.Add(cart);
-//    }
-
-//    foreach (var cartItemDto in cartItemsDto)
-//    {
-//        // Add the new item to the cart
-//        var cartItem = new CartItem
-//        {
-//            CartItemId = Guid.NewGuid(),
-//            CartId = cart.CartId,
-//            ProductId = cartItemDto.ProductId,
-//            Quantity = cartItemDto.Quantity,
-//            ProductPrice = cartItemDto.ProductPrice,
-//            TotalPrice = cartItemDto.TotalPrice * cartItemDto.Quantity,
-//            CreatedAt = DateTime.UtcNow
-//        };
-//        cart.CartItems.Add(cartItem);
-//        _logger.LogInformation("Added item to cart: {CartItemId}", cartItem.CartItemId);
-//    }
-//    await _appDbContext.SaveChangesAsync();
-//    return Ok("The Items are successfully added to the Cart");
-//}
-//[HttpPost("AddItemToCart")]
-//public async Task<IActionResult> AddItemToCart([FromBody] CartItemDto cartItem)
-//{
-//    //var token = Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-//    //var cartItems = _cartService.DecodeJwt(token);
-
-//    //cartItems.Add(cartItem);
-//    //var newToken = _cartService.GenerateJwt(userId, cartItems);
-
-//    //return Ok(new { token = newToken });
-//    var user = await _userManager.GetUserAsync(User); // Assuming you are using ASP.NET Identity
-//    if (user == null)
-//    {
-//        return Unauthorized();
-//    }
-//    var token = HttpContext.Request.Cookies["cartToken"];
-//    List<CartItemDto> cartItems = string.IsNullOrEmpty(token) ? new List<CartItemDto>() : _tokenGenerator.DecodeCartJwt(token);
-
-//    cartItems.Add(cartItem);
-//    var newToken = await _tokenGenerator.GenerateCartJwt(user, cartItems);
-//    HttpContext.Response.Cookies.Append("cartToken", newToken);
-
-//    return Ok(new { token = newToken });
-//}

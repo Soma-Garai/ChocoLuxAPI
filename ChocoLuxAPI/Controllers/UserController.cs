@@ -1,6 +1,7 @@
 ﻿using ChocoLuxAPI.DTO;
 using ChocoLuxAPI.Models;
 using ChocoLuxAPI.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -13,6 +14,7 @@ namespace ChocoLuxAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [AllowAnonymous]
     public class UserController : ControllerBase
     {
         private readonly SignInManager<UserModel> _signInManager;
