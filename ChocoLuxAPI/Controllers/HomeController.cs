@@ -29,11 +29,10 @@ namespace ChocoLuxAPI.Controllers
                 .Include(p => p.Category) // Include category information
                 .Select(p => new ProductWithCategoryDto
                 {
-                    //product_id = p.product_id,
+                    ProductId = p.ProductId,
                     ProductName = p.ProductName,
                     ProductDescription = p.ProductDescription,
                     ProductPrice = p.ProductPrice,
-                    //ProductImagePath = p.ProductImagePath,
                     ProductImagePath = $"{Request.Scheme}://{Request.Host}{p.ProductImagePath}", // Construct absolute URL
                     CategoryId = p.CategoryId,
                     CategoryName = p.CategoryName // Assuming there's a property for CategoryName in Category entity

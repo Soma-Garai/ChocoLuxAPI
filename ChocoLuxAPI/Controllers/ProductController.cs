@@ -120,30 +120,35 @@ namespace ChocoLuxAPI.Controllers
             return Ok("Product added successfully.");
         }
 
-        [HttpGet("EditProduct/{id}")]  //just return the product details based on selected id
-        public async Task<IActionResult> EditProduct(Guid id)
+        [HttpGet("EditProduct/{ProductId}")]  //just return the product details based on selected id
+        public async Task<IActionResult> EditProduct(Guid ProductId)
         {
-            _logger.LogInformation("GetProductById method started with ID: {Id}", id);
+            _logger.LogInformation("GetProductById method started with ID: {ProductId}", ProductId);
 
-            try
-            {
-                var product = await _context.tblProducts.FindAsync(id);
-                if (product == null)
-                {
-                    _logger.LogWarning("Product not found with ID: {Id}", id);
-                    return NotFound();
-                }
+            var productWithCategory = _context.tblProducts
+        .Include(p => p.Category) // Include category information
+        .Where(p => p.ProductId == ProductId) // Filter by product ID
+        .Select(p => new ProductWithCategoryDto
+        {
+            ProductId = p.ProductId,
+            ProductName = p.ProductName,
+            ProductDescription = p.ProductDescription,
+            ProductPrice = p.ProductPrice,
+            ProductImagePath = $"{Request.Scheme}://{Request.Host}{p.ProductImagePath}", // Construct absolute URL
+            CategoryId = p.CategoryId,
+            CategoryName = p.Category.CategoryName // Assuming there's a property for CategoryName in Category entity
+        })
+        .FirstOrDefault(); // Get the single product or default
 
-                return Ok(product);
-            }
-            catch (Exception ex)
+            if (productWithCategory == null)
             {
-                _logger.LogError(ex, "An error occurred while fetching the product with ID: {Id}", id);
-                return StatusCode(500, "Internal server error");
+                return NotFound(); // Return a 404 if the product is not found
             }
+
+            return Ok(productWithCategory); // Return the found product
         }
 
-        [HttpPut("UpdateProduct/{id}")]
+        [HttpPut("UpdateProduct/{ProductId}")]
         public async Task<IActionResult> UpdateProduct(Guid ProductId, [FromForm] ProductDto productDto)
         {
             if (!ModelState.IsValid)
