@@ -3,10 +3,12 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace ChocoLuxAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class addedSessionTable : Migration
+    public partial class addedCartAndSessionTables : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -77,6 +79,7 @@ namespace ChocoLuxAPI.Migrations
                 table: "TblCartItems",
                 column: "CartId");
         }
+
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)

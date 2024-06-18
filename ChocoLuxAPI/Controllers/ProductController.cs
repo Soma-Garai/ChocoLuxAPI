@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 
 namespace ChocoLuxAPI.Controllers
 {
@@ -104,7 +105,7 @@ namespace ChocoLuxAPI.Controllers
 
             Product model = new Product
             {
-                //ProductId = Guid.NewGuid(),
+                ProductId = Guid.NewGuid(),
                 ProductName = productDto.ProductName,
                 ProductDescription = productDto.ProductDescription,
                 ProductPrice = productDto.ProductPrice,
@@ -148,7 +149,7 @@ namespace ChocoLuxAPI.Controllers
             return Ok(productWithCategory); // Return the found product
         }
 
-        [HttpPut("UpdateProduct/{ProductId}")]
+        [HttpPost("UpdateProduct/{ProductId}")]
         public async Task<IActionResult> UpdateProduct(Guid ProductId, [FromForm] ProductDto productDto)
         {
             if (!ModelState.IsValid)
@@ -161,18 +162,18 @@ namespace ChocoLuxAPI.Controllers
             {
                 return NotFound("Product not found.");
             }
-
+            // Retain the existing image path unless a new image is uploaded
             string serverFolder = product.ProductImagePath;
 
             if (productDto.ProductImage != null)
             {
                 string folder = "images/";
-                string uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(productDto.ProductImage.FileName);
+                string uniqueFileName = Guid.NewGuid().ToString() + productDto.ProductImage.FileName;
                 string newProductImagePath = Path.Combine(folder, uniqueFileName);
-                serverFolder = Path.Combine(_hostEnvironment.WebRootPath, newProductImagePath);
+                string serverFolderNew = Path.Combine(_hostEnvironment.WebRootPath, newProductImagePath);
 
                 // Ensure the directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(serverFolder) ?? throw new InvalidOperationException("Directory path is null"));
+                Directory.CreateDirectory(Path.GetDirectoryName(serverFolderNew) ?? throw new InvalidOperationException("Directory path is null"));
 
                 // Delete the old image file if it exists
                 if (!string.IsNullOrEmpty(product.ProductImagePath))
@@ -185,14 +186,18 @@ namespace ChocoLuxAPI.Controllers
                 }
 
                 // Copy the new file to the server
-                using (var fileStream = new FileStream(serverFolder, FileMode.Create))
+                using (var fileStream = new FileStream(serverFolderNew, FileMode.Create))
                 {
                     await productDto.ProductImage.CopyToAsync(fileStream);
                 }
 
-                product.ProductImagePath = "/" + newProductImagePath; // Update the path in the model
+                // Update the path in the model only if a new image is uploaded
+                product.ProductImagePath = "/"+ newProductImagePath;
             }
-
+            else
+            {
+                product.ProductImagePath = serverFolder;
+            }
             // Update other product properties
             product.ProductName = productDto.ProductName;
             product.ProductDescription = productDto.ProductDescription;
@@ -204,6 +209,7 @@ namespace ChocoLuxAPI.Controllers
 
             return Ok("Product updated successfully.");
         }
+
 
 
         [HttpDelete("DeleteProduct/{id}")]
@@ -235,3 +241,60 @@ namespace ChocoLuxAPI.Controllers
 
     }
 }
+
+//[HttpPost("UpdateProduct/{ProductId}")]
+//public async Task<IActionResult> UpdateProduct(Guid ProductId, [FromForm] ProductDto productDto)
+//{
+//    if (!ModelState.IsValid)
+//    {
+//        return BadRequest(ModelState);
+//    }
+
+//    var product = await _context.tblProducts.FindAsync(ProductId);
+//    if (product == null)
+//    {
+//        return NotFound("Product not found.");
+//    }
+
+//    string serverFolder = product.ProductImagePath;
+
+//    if (productDto.ProductImage != null)
+//    {
+//        string folder = "images/";
+//        string uniqueFileName = Guid.NewGuid().ToString() + productDto.ProductImage.FileName;
+//        string newProductImagePath = Path.Combine(folder, uniqueFileName);
+//        serverFolder = Path.Combine(_hostEnvironment.WebRootPath, newProductImagePath);
+
+//        // Ensure the directory exists
+//        Directory.CreateDirectory(Path.GetDirectoryName(serverFolder) ?? throw new InvalidOperationException("Directory path is null"));
+
+//        // Delete the old image file if it exists
+//        if (!string.IsNullOrEmpty(product.ProductImagePath))
+//        {
+//            string oldImagePath = Path.Combine(_hostEnvironment.WebRootPath, product.ProductImagePath.TrimStart('/'));
+//            if (System.IO.File.Exists(oldImagePath))
+//            {
+//                System.IO.File.Delete(oldImagePath);
+//            }
+//        }
+
+//        // Copy the new file to the server
+//        using (var fileStream = new FileStream(serverFolder, FileMode.Create))
+//        {
+//            await productDto.ProductImage.CopyToAsync(fileStream);
+//        }
+
+//        product.ProductImagePath = "/" + newProductImagePath; // Update the path in the model
+//    }
+
+//    // Update other product properties
+//    product.ProductName = productDto.ProductName;
+//    product.ProductDescription = productDto.ProductDescription;
+//    product.ProductPrice = productDto.ProductPrice;
+//    product.CategoryId = productDto.CategoryId;
+
+//    _context.tblProducts.Update(product);
+//    await _context.SaveChangesAsync();
+
+//    return Ok("Product updated successfully.");
+//}

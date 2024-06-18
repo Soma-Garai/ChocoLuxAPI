@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ChocoLuxAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240605073930_addedSessionTable")]
-    partial class addedSessionTable
+    [Migration("20240617061226_addedCartAndSessionTables")]
+    partial class addedCartAndSessionTables
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

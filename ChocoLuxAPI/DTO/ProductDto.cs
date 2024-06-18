@@ -5,8 +5,8 @@ namespace ChocoLuxAPI.DTO
 {
     public class ProductDto
     {
-        public Guid ProductId = Guid.NewGuid();
-        
+        public Guid ProductId { get; set; }
+
         public string? ProductName { get; set; }
         public string? ProductDescription { get; set; }
         public int? ProductPrice { get; set; }
@@ -15,7 +15,7 @@ namespace ChocoLuxAPI.DTO
         //This property is for the form file upload, so it's not mapped to the database
         [NotMapped]
         public IFormFile? ProductImage { get; set; }
-        //public string? ProductImagePath { get; set; }
+        public string? ProductImagePath { get; set; }
 
 
         public Guid CategoryId { get; set; }      // Foreign key
