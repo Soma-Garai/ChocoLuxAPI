@@ -53,7 +53,8 @@ namespace ChocoLuxAPI.Controllers
                 {
                     SessionId = Guid.NewGuid(),
                     UserId = user.Id, // Assuming user.Id is the user's unique identifier
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.UtcNow,
+                    
                 };
 
                 _appDbContext.TblSession.Add(session);
@@ -186,7 +187,7 @@ namespace ChocoLuxAPI.Controllers
                 return Unauthorized("Invalid or expired session");
             }
 
-            // // this query is used to fetch the cart and its items based on the user's session ID
+            // this query is used to fetch the cart and its items based on the user's session ID
             var cart = await _appDbContext.TblCart
                 .Include(c => c.CartItems)
                 .FirstOrDefaultAsync(c => c.SessionId == sessionId);

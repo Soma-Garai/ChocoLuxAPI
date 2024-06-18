@@ -127,20 +127,20 @@ namespace ChocoLuxAPI.Controllers
             _logger.LogInformation("GetProductById method started with ID: {ProductId}", ProductId);
 
             var productWithCategory = _context.tblProducts
-        .Include(p => p.Category) // Include category information
-        .Where(p => p.ProductId == ProductId) // Filter by product ID
-        .Select(p => new ProductWithCategoryDto
-        {
-            ProductId = p.ProductId,
-            ProductName = p.ProductName,
-            ProductDescription = p.ProductDescription,
-            ProductPrice = p.ProductPrice,
-            ProductImagePath = $"{Request.Scheme}://{Request.Host}{p.ProductImagePath}", // Construct absolute URL
-            CategoryId = p.CategoryId,
-            CategoryName = p.Category.CategoryName // Assuming there's a property for CategoryName in Category entity
-        })
-        .FirstOrDefault(); // Get the single product or default
-
+                                      .Include(p => p.Category) // Include category information
+                                      .Where(p => p.ProductId == ProductId) // Filter by product ID
+                                      .Select(p => new ProductWithCategoryDto
+                                      {
+                                          ProductId = p.ProductId,
+                                          ProductName = p.ProductName,
+                                          ProductDescription = p.ProductDescription,
+                                          ProductPrice = p.ProductPrice,
+                                          ProductImagePath = $"{Request.Scheme}://{Request.Host}{p.ProductImagePath}", // Construct absolute URL
+                                          CategoryId = p.CategoryId,
+                                          CategoryName = p.Category.CategoryName // Assuming there's a property for CategoryName in Category entity
+                                      })
+                                      .FirstOrDefault(); // Get the single product or default
+             
             if (productWithCategory == null)
             {
                 return NotFound(); // Return a 404 if the product is not found
@@ -203,7 +203,7 @@ namespace ChocoLuxAPI.Controllers
             product.ProductDescription = productDto.ProductDescription;
             product.ProductPrice = productDto.ProductPrice;
             product.CategoryId = productDto.CategoryId;
-
+            product.CategoryName = productDto.CategoryName;
             _context.tblProducts.Update(product);
             await _context.SaveChangesAsync();
 

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ChocoLuxAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240617061226_addedCartAndSessionTables")]
-    partial class addedCartAndSessionTables
+    [Migration("20240618090725_MakingExpiresAtNullable")]
+    partial class MakingExpiresAtNullable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -205,10 +205,10 @@ namespace ChocoLuxAPI.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("ExpiresAt")
+                    b.Property<DateTime?>("ExpiresAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("UserId")
