@@ -1,10 +1,12 @@
 ﻿using ChocoLuxAPI.DTO;
 using ChocoLuxAPI.Models;
+using ChocoLuxAPI.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
+using Chronos.ApiResponse;
 
 namespace ChocoLuxAPI.Controllers
 {
@@ -16,11 +18,15 @@ namespace ChocoLuxAPI.Controllers
         private readonly ILogger<ProductController> _logger;
         private readonly AppDbContext _context;
         private readonly IWebHostEnvironment _hostEnvironment;
-        public ProductController(AppDbContext context, IWebHostEnvironment hostEnvironment, ILogger<ProductController> logger)
+        private readonly IProductRepository _productRepository;
+        public ProductController(AppDbContext context, 
+            IWebHostEnvironment hostEnvironment, 
+            ILogger<ProductController> logger,IProductRepository productRepository)
         {
             _context = context;
             _hostEnvironment = hostEnvironment;
             _logger = logger;
+            _productRepository = productRepository;
         }
 
         [HttpGet]
@@ -28,22 +34,23 @@ namespace ChocoLuxAPI.Controllers
         public IActionResult AllProducts()
         {
             // Retrieve products from the database along with categories 
-            var productsWithCategories = _context.tblProducts
-                .Include(p => p.Category) // Include category information
-                .Select(p => new ProductWithCategoryDto
-                {
-                    //product_id = p.product_id,
-                    ProductName = p.ProductName,
-                    ProductDescription = p.ProductDescription,
-                    ProductPrice = p.ProductPrice,
-                    //ProductImagePath = p.ProductImagePath,
-                    ProductImagePath = $"{Request.Scheme}://{Request.Host}{p.ProductImagePath}", // Construct absolute URL
-                    CategoryId = p.CategoryId,
-                    CategoryName = p.CategoryName // Assuming there's a property for CategoryName in Category entity
-                })
-                .ToList();
+            //var productsWithCategories = _context.tblProducts
+            //    .Include(p => p.Category) // Include category information
+            //    .Select(p => new ProductWithCategoryDto
+            //    {
+            //        //product_id = p.product_id,
+            //        ProductName = p.ProductName,
+            //        ProductDescription = p.ProductDescription,
+            //        ProductPrice = p.ProductPrice,
+            //        //ProductImagePath = p.ProductImagePath,
+            //        ProductImagePath = $"{Request.Scheme}://{Request.Host}{p.ProductImagePath}", // Construct absolute URL
+            //        CategoryId = p.CategoryId,
+            //        CategoryName = p.CategoryName // Assuming there's a property for CategoryName in Category entity
+            //    })
+            //    .ToList();
             //ViewBag.ProductsWithCategories = productsWithCategories;
-            return Ok(productsWithCategories);
+            var products = _productRepository.ListAll();
+            return ApiResponseExtension.ToSuccessApiResult(products);
         }
         [HttpGet("{id}")]
         public async Task<IActionResult> GetProductById(Guid id)

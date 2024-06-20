@@ -54,7 +54,7 @@ namespace ChocoLuxAPI.Controllers
                     SessionId = Guid.NewGuid(),
                     UserId = user.Id, // Assuming user.Id is the user's unique identifier
                     CreatedAt = DateTime.UtcNow,
-                    
+                    ExpiresAt = null
                 };
 
                 _appDbContext.TblSession.Add(session);
@@ -109,12 +109,13 @@ namespace ChocoLuxAPI.Controllers
             }
 
             await _appDbContext.SaveChangesAsync(); //saving Cart and CartItems table
+            //returns a message and the sessionId
             return Ok(new { Message = "The Items are successfully added to the Cart", SessionId = session.SessionId });
         }
 
 
-        [HttpGet("GetCartItems")]
-        public async Task<IActionResult> GetCartItems([FromHeader] Guid sessionId)
+        [HttpGet("GetCartItems/{sessionId}")]
+        public async Task<IActionResult> GetCartItems(Guid sessionId)
         {
             // Check if the session is valid
             var session = await _appDbContext.TblSession.FirstOrDefaultAsync(s => s.SessionId == sessionId);
@@ -123,11 +124,12 @@ namespace ChocoLuxAPI.Controllers
                 return Unauthorized("Invalid or expired session");
             }
 
-            // this query is used to fetch the cart and its items based on the user's session ID
+            // this query is used to fetch the cart and "its items" based on the user's session ID
             var cart = await _appDbContext.TblCart
                 .Include(c => c.CartItems)
                 .FirstOrDefaultAsync(c => c.SessionId == sessionId);
 
+            var CartSessionId = cart.SessionId;
             if (cart == null)
             {
                 return NotFound("Cart not found");
@@ -136,17 +138,20 @@ namespace ChocoLuxAPI.Controllers
             //a CartItemDto, and then collects these transformed objects into a list.
             var cartItemsDto = cart.CartItems.Select(ci => new CartItemDto
             {
+                SessionId = CartSessionId,
+                CartItemId = ci.CartItemId,
                 ProductId = ci.ProductId,
                 Quantity = ci.Quantity,
                 ProductPrice = ci.ProductPrice,
                 TotalPrice = ci.TotalPrice
+                
             }).ToList();
 
             return Ok(cartItemsDto);
         }
 
         [HttpDelete("RemoveItemFromCart")]
-        public async Task<IActionResult> RemoveItemFromCart([FromHeader] Guid sessionId, [FromHeader] Guid cartItemId)
+        public async Task<IActionResult> RemoveItemFromCart(Guid sessionId, Guid cartItemId)
         {
             // Check if the session is valid
             var session = await _appDbContext.TblSession.FirstOrDefaultAsync(s => s.SessionId == sessionId);

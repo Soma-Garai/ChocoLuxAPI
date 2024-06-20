@@ -1,5 +1,6 @@
 using ChocoLuxAPI.Models;
 using ChocoLuxAPI.Permission;
+using ChocoLuxAPI.Repository;
 using ChocoLuxAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -28,6 +29,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddIdentity<UserModel, IdentityRole>()
             .AddEntityFrameworkStores<AppDbContext>()
             .AddDefaultTokenProviders();
+
+builder.Services.AddScoped<IProductRepository,ProductRepository>();
 //builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
 //builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
