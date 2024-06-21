@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using RestSharp;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Security.Cryptography.Xml;
@@ -22,13 +24,32 @@ namespace ChocoLuxAPI.Controllers
         private readonly UserManager<UserModel> _userManager;
         private readonly AppDbContext _appDbContext;
         private readonly ILogger<CartController> _logger;
-        public CartController( TokenGenerator tokenGenerator, UserManager<UserModel> userManager, AppDbContext appDbContext, ILogger<CartController> logger)
+
+        public CartController( TokenGenerator tokenGenerator, UserManager<UserModel> userManager, 
+            AppDbContext appDbContext, ILogger<CartController> logger)
         {
             
             _tokenGenerator = tokenGenerator;
             _userManager = userManager;
             _appDbContext = appDbContext;
-            _logger = logger;
+            _logger = logger; 
+        }
+        [HttpPost("CreateSessionForCart/{UserId}")]
+        public async Task<IActionResult> CreateSessionForCart(string userId)
+        {
+            // Create a new session
+            var session = new Session
+            {
+                SessionId = Guid.NewGuid(),
+                UserId = userId,
+                CreatedAt = DateTime.UtcNow,
+                ExpiresAt = null
+            };
+
+            _appDbContext.TblSession.Add(session);
+            await _appDbContext.SaveChangesAsync();
+
+            return Ok(session.SessionId);
         }
 
         [HttpPost("AddItemToCart")]
@@ -40,39 +61,58 @@ namespace ChocoLuxAPI.Controllers
 
             Session session= null;
             //if session is not yet created
-            if (sessionId == null || !await _appDbContext.TblSession.AnyAsync(s => s.SessionId == sessionId))
-            {
-                // Create a new session
-                var user = await _userManager.FindByIdAsync(userId); // Assuming you are using ASP.NET Identity
-                if (user == null)
-                {
-                    return Unauthorized("User not found");
-                }
+            //if (sessionId == null || !await _appDbContext.TblSession.AnyAsync(s => s.SessionId == sessionId))
+            //{
+            //    return RedirectToAction("CreateSessionForCart",userId);
+            //    // Create a new session
+            //    var user = await _userManager.FindByIdAsync(userId); // Assuming you are using ASP.NET Identity
+            //    if (user == null)
+            //    {
+            //        return Unauthorized("User not found");
+            //    }
 
-                session = new Session
-                {
-                    SessionId = Guid.NewGuid(),
-                    UserId = user.Id, // Assuming user.Id is the user's unique identifier
-                    CreatedAt = DateTime.UtcNow,
-                    ExpiresAt = null
-                };
+            //    session = new Session
+            //    {
+            //        SessionId = Guid.NewGuid(),
+            //        UserId = user.Id, // Assuming user.Id is the user's unique identifier
+            //        CreatedAt = DateTime.UtcNow,
+            //        ExpiresAt = null
+            //    };
 
-                _appDbContext.TblSession.Add(session);
-                await _appDbContext.SaveChangesAsync();
+            //    _appDbContext.TblSession.Add(session);
+            //    await _appDbContext.SaveChangesAsync();
 
-                sessionId = session.SessionId; // Set the sessionId to the new session's ID
-            }
-            else
-            {
-                // Check if the session is valid
-                session = await _appDbContext.TblSession.FirstOrDefaultAsync(s => s.SessionId == sessionId);
-                if (session == null || session.ExpiresAt < DateTime.UtcNow)
-                {
-                    return Unauthorized("Invalid or expired session");
-                }
-            }
+            //    /*sessionId = session.SessionId; */// Set the sessionId to the new session's ID
+            //}
+            //if (string.IsNullOrEmpty(sessionId.ToString()))
+            //{
+            //    // Call Web API to create a new session
+            //    /*var userId = User.Identity.GetUserId();*/ // Assuming you have user authentication
+            //    var UserId = "664b179b-df04-4bcc-b727-6b761f7bd6e8";
+            //    var sessionRequest = new RestRequest("api/cart/CreateSessionForCart", Method.Post);
+            //    sessionRequest.AddJsonBody(userId);
+            //    var sessionResponse = await _restClient.ExecuteAsync<Guid>(sessionRequest);
+
+            //    if (!sessionResponse.IsSuccessful)
+            //    {
+            //        _logger.LogError("Failed to create session: {Reason}", sessionResponse.ErrorMessage);
+            //        return StatusCode((int)sessionResponse.StatusCode, sessionResponse.ErrorMessage);
+            //    }
+
+            //    var SessionId = sessionResponse.Data.ToString();
+            //    HttpContext.Session.SetString("SessionId", SessionId);
+            //}
+            //else
+            //{
+            //    // Check if the session is valid
+            //    session = await _appDbContext.TblSession.FirstOrDefaultAsync(s => s.SessionId == sessionId);
+            //    if (session == null || session.ExpiresAt < DateTime.UtcNow)
+            //    {
+            //        return Unauthorized("Invalid or expired session");
+            //    }
+            //}
             // Log the session ID and user ID
-            _logger.LogInformation($"User ID: {session.UserId}, Session ID: {sessionId}");
+            //_logger.LogInformation($"User ID: {session.UserId}, Session ID: {sessionId}");
 
             // Find or create a cart for the session
             var cart = await _appDbContext.TblCart
@@ -85,7 +125,7 @@ namespace ChocoLuxAPI.Controllers
                 {
                     CartId = Guid.NewGuid(),
                     SessionId = sessionId.Value,
-                    UserId = session.UserId
+                    UserId = userId
                 };
 
                 _appDbContext.TblCart.Add(cart);
@@ -110,7 +150,7 @@ namespace ChocoLuxAPI.Controllers
 
             await _appDbContext.SaveChangesAsync(); //saving Cart and CartItems table
             //returns a message and the sessionId
-            return Ok(new { Message = "The Items are successfully added to the Cart", SessionId = session.SessionId });
+            return Ok(new { Message = "The Items are successfully added to the Cart"/*, SessionId = session.SessionId*/ });
         }
 
 
