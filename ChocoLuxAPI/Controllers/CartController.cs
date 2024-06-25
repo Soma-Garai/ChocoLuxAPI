@@ -57,62 +57,8 @@ namespace ChocoLuxAPI.Controllers
         {
             var sessionId = cartOperationDto.SessionId;
             var userId= cartOperationDto.UserId;
-            List<CartItemDto> cartItemsDto = cartOperationDto.CartItems;
-
-            Session session= null;
-            //if session is not yet created
-            //if (sessionId == null || !await _appDbContext.TblSession.AnyAsync(s => s.SessionId == sessionId))
-            //{
-            //    return RedirectToAction("CreateSessionForCart",userId);
-            //    // Create a new session
-            //    var user = await _userManager.FindByIdAsync(userId); // Assuming you are using ASP.NET Identity
-            //    if (user == null)
-            //    {
-            //        return Unauthorized("User not found");
-            //    }
-
-            //    session = new Session
-            //    {
-            //        SessionId = Guid.NewGuid(),
-            //        UserId = user.Id, // Assuming user.Id is the user's unique identifier
-            //        CreatedAt = DateTime.UtcNow,
-            //        ExpiresAt = null
-            //    };
-
-            //    _appDbContext.TblSession.Add(session);
-            //    await _appDbContext.SaveChangesAsync();
-
-            //    /*sessionId = session.SessionId; */// Set the sessionId to the new session's ID
-            //}
-            //if (string.IsNullOrEmpty(sessionId.ToString()))
-            //{
-            //    // Call Web API to create a new session
-            //    /*var userId = User.Identity.GetUserId();*/ // Assuming you have user authentication
-            //    var UserId = "664b179b-df04-4bcc-b727-6b761f7bd6e8";
-            //    var sessionRequest = new RestRequest("api/cart/CreateSessionForCart", Method.Post);
-            //    sessionRequest.AddJsonBody(userId);
-            //    var sessionResponse = await _restClient.ExecuteAsync<Guid>(sessionRequest);
-
-            //    if (!sessionResponse.IsSuccessful)
-            //    {
-            //        _logger.LogError("Failed to create session: {Reason}", sessionResponse.ErrorMessage);
-            //        return StatusCode((int)sessionResponse.StatusCode, sessionResponse.ErrorMessage);
-            //    }
-
-            //    var SessionId = sessionResponse.Data.ToString();
-            //    HttpContext.Session.SetString("SessionId", SessionId);
-            //}
-            //else
-            //{
-            //    // Check if the session is valid
-            //    session = await _appDbContext.TblSession.FirstOrDefaultAsync(s => s.SessionId == sessionId);
-            //    if (session == null || session.ExpiresAt < DateTime.UtcNow)
-            //    {
-            //        return Unauthorized("Invalid or expired session");
-            //    }
-            //}
-            // Log the session ID and user ID
-            //_logger.LogInformation($"User ID: {session.UserId}, Session ID: {sessionId}");
+            //List<CartItemDto> cartItemsDto = cartOperationDto.CartItems;         
+            var cartItemDto = cartOperationDto.CartItems;
 
             // Find or create a cart for the session
             var cart = await _appDbContext.TblCart
@@ -128,11 +74,12 @@ namespace ChocoLuxAPI.Controllers
                     UserId = userId
                 };
 
-                _appDbContext.TblCart.Add(cart);
+                await _appDbContext.TblCart.AddAsync(cart);
+                await _appDbContext.SaveChangesAsync();
             }
 
-            foreach (var cartItemDto in cartItemsDto)
-            {
+            //foreach (var cartItemDto in cartItemsDto)
+            //{
                 // Add the new item to the cart
                 var cartItem = new CartItem
                 {
@@ -144,13 +91,17 @@ namespace ChocoLuxAPI.Controllers
                     TotalPrice = cartItemDto.ProductPrice * cartItemDto.Quantity,
                     CreatedAt = DateTime.UtcNow
                 };
-                cart.CartItems.Add(cartItem);
+                //cart.CartItems.Add(cartItem);
+                _appDbContext.TblCartItems.Add(cartItem);
+                _appDbContext.SaveChanges();
                 _logger.LogInformation("Added item to cart: {CartItemId}", cartItem.CartItemId);
-            }
 
-            await _appDbContext.SaveChangesAsync(); //saving Cart and CartItems table
+            //}
+
+             //saving Cart and CartItems table
+            //await _appDbContext.SaveChangesAsync();
             //returns a message and the sessionId
-            return Ok(new { Message = "The Items are successfully added to the Cart"/*, SessionId = session.SessionId*/ });
+            return Ok(new { Message = "The Item is successfully added to the Cart"/*, SessionId = session.SessionId*/ });
         }
 
 
@@ -190,7 +141,7 @@ namespace ChocoLuxAPI.Controllers
             return Ok(cartItemsDto);
         }
 
-        [HttpDelete("RemoveItemFromCart")]
+        [HttpPost("RemoveItemFromCart")]
         public async Task<IActionResult> RemoveItemFromCart(Guid sessionId, Guid cartItemId)
         {
             // Check if the session is valid
@@ -210,13 +161,14 @@ namespace ChocoLuxAPI.Controllers
             _appDbContext.TblCartItems.Remove(cartItem);
             await _appDbContext.SaveChangesAsync();
 
-            // Check if the cart is empty and expire the session if it is
+            // Check if the cart is empty and set the expiresAt time in the session table 
             var cart = await _appDbContext.TblCart.Include(c => c.CartItems).FirstOrDefaultAsync(c => c.CartId == cartItem.CartId);
             if (cart != null && !cart.CartItems.Any())
             {
-                _appDbContext.TblSession.Remove(session);
+                //_appDbContext.TblSession.Remove(session);
+                session.ExpiresAt= DateTime.Now;
                 await _appDbContext.SaveChangesAsync();
-                return Ok(new { Message = "All items removed. Session expired." });
+                return Ok(new { Message = "All items removed. Session expiration updated." ,expiresAt = session.ExpiresAt });
             }
 
             return Ok(new { Message = "Item removed from cart" });
