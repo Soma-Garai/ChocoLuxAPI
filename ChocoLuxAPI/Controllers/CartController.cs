@@ -140,7 +140,7 @@ namespace ChocoLuxAPI.Controllers
 
             return Ok(cartItemsDto);
         }
-
+        //delete method for the delete button
         [HttpPost("RemoveItemFromCart")]
         public async Task<IActionResult> RemoveItemFromCart(Guid sessionId, Guid cartItemId)
         {
@@ -166,17 +166,53 @@ namespace ChocoLuxAPI.Controllers
             if (cart != null && !cart.CartItems.Any())
             {
                 //_appDbContext.TblSession.Remove(session);
-                session.ExpiresAt= DateTime.Now;
+                session.ExpiresAt = DateTime.Now;
                 await _appDbContext.SaveChangesAsync();
-                return Ok(new { Message = "All items removed. Session expiration updated." ,expiresAt = session.ExpiresAt });
+                return Ok(new { Message = "All items removed. Session expiration updated.", expiresAt = session.ExpiresAt });
+            }
+
+            return Ok(new { Message = "Item removed from cart" });
+        }
+        //delete method for the javascript
+        [HttpPost("RemoveFromCart")]
+        public async Task<IActionResult> RemoveFromCart([FromForm] CartItemDto cartItemDto)
+        {
+            var sessionId = cartItemDto.SessionId;
+            var cartItemId = cartItemDto.CartItemId;
+            // Check if the session is valid
+            var session = await _appDbContext.TblSession.FirstOrDefaultAsync(s => s.SessionId == sessionId);
+            if (session == null)
+            {
+                return Unauthorized("Invalid or expired session");
+            }
+
+            // Find the cart item and remove it
+            var cartItem = await _appDbContext.TblCartItems.FirstOrDefaultAsync(ci => ci.CartItemId == cartItemId);
+            if (cartItem == null)
+            {
+                return NotFound("Cart item not found");
+            }
+
+            _appDbContext.TblCartItems.Remove(cartItem);
+            await _appDbContext.SaveChangesAsync();
+
+            // Check if the cart is empty and set the expiresAt time in the session table 
+            var cart = await _appDbContext.TblCart.Include(c => c.CartItems).FirstOrDefaultAsync(c => c.CartId == cartItem.CartId);
+            if (cart != null && !cart.CartItems.Any())
+            {
+                //_appDbContext.TblSession.Remove(session);
+                session.ExpiresAt = DateTime.Now;
+                await _appDbContext.SaveChangesAsync();
+                return Ok(new { Message = "All items removed. Session expiration updated.", expiresAt = session.ExpiresAt });
             }
 
             return Ok(new { Message = "Item removed from cart" });
         }
 
-        [HttpPut("UpdateCartItem")]
-        public async Task<IActionResult> UpdateCartItem([FromHeader] Guid sessionId, [FromBody] CartItemDto cartItemDto)
+        [HttpPost("UpdateCartItem")]
+        public async Task<IActionResult> UpdateCartItem(/*[FromHeader] Guid sessionId,*/ [FromForm] CartItemDto cartItemDto)
         {
+            var sessionId= cartItemDto.SessionId;
             // Check if the session is valid
             var session = await _appDbContext.TblSession.FirstOrDefaultAsync(s => s.SessionId == sessionId);
             if (session == null)
@@ -210,7 +246,41 @@ namespace ChocoLuxAPI.Controllers
             _logger.LogInformation("Updated item in cart: {CartItemId}", cartItem.CartItemId);
             return Ok("Item updated successfully");
         }
+        //[HttpPost("UpdateCartItem")]
+        //public async Task<IActionResult> UpdateCartItem([FromForm] UpdateCartItemDto updateCartItemDto)
+        //{
+        //    var cartItem = await _appDbContext.TblCartItems
+        //        .FirstOrDefaultAsync(ci => ci.CartItemId == updateCartItemDto.CartItemId);
 
+        //    if (cartItem == null)
+        //    {
+        //        return NotFound(new { Message = "Cart item not found" });
+        //    }
+
+        //    cartItem.Quantity = updateCartItemDto.Quantity;
+        //    cartItem.TotalPrice = cartItem.ProductPrice * updateCartItemDto.Quantity;
+
+        //    await _appDbContext.SaveChangesAsync();
+
+        //    return Ok(new { Message = "Cart item updated successfully" });
+        //}
+
+        //[HttpPost("RemoveCartItem")]
+        //public async Task<IActionResult> RemoveCartItem([FromForm] RemoveCartItemDto removeCartItemDto)
+        //{
+        //    var cartItem = await _appDbContext.TblCartItems
+        //        .FirstOrDefaultAsync(ci => ci.CartItemId == removeCartItemDto.CartItemId);
+
+        //    if (cartItem == null)
+        //    {
+        //        return NotFound(new { Message = "Cart item not found" });
+        //    }
+
+        //    _appDbContext.TblCartItems.Remove(cartItem);
+        //    await _appDbContext.SaveChangesAsync();
+
+        //    return Ok(new { Message = "Cart item removed successfully" });
+        //}
 
     }
 }
