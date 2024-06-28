@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ChocoLuxAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240618090725_MakingExpiresAtNullable")]
+    [Migration("20240628060944_MakingExpiresAtNullable")]
     partial class MakingExpiresAtNullable
     {
         /// <inheritdoc />

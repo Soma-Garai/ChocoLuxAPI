@@ -175,10 +175,10 @@ namespace ChocoLuxAPI.Controllers
         }
         //delete method for the javascript
         [HttpPost("RemoveFromCart")]
-        public async Task<IActionResult> RemoveFromCart([FromForm] CartItemDto cartItemDto)
+        public async Task<IActionResult> RemoveFromCart(Guid sessionId, Guid cartItemId)
         {
-            var sessionId = cartItemDto.SessionId;
-            var cartItemId = cartItemDto.CartItemId;
+            //var sessionId = cartItemDto.SessionId;
+            //var cartItemId = cartItemDto.CartItemId;
             // Check if the session is valid
             var session = await _appDbContext.TblSession.FirstOrDefaultAsync(s => s.SessionId == sessionId);
             if (session == null)
