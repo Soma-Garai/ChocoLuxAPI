@@ -89,7 +89,7 @@ namespace ChocoLuxAPI.Controllers
                     Quantity = cartItemDto.Quantity,
                     ProductPrice = cartItemDto.ProductPrice,
                     TotalPrice = cartItemDto.ProductPrice * cartItemDto.Quantity,
-                    CreatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.Now
                 };
                 //cart.CartItems.Add(cartItem);
                 _appDbContext.TblCartItems.Add(cartItem);
@@ -209,10 +209,12 @@ namespace ChocoLuxAPI.Controllers
             return Ok(new { Message = "Item removed from cart" });
         }
 
+        //update method for the javascript
         [HttpPost("UpdateCartItem")]
-        public async Task<IActionResult> UpdateCartItem(/*[FromHeader] Guid sessionId,*/ [FromForm] CartItemDto cartItemDto)
+        public async Task<IActionResult> UpdateCartItem(CartItemDto cartItemDto)
         {
             var sessionId= cartItemDto.SessionId;
+            var cartItemId = cartItemDto.CartItemId;
             // Check if the session is valid
             var session = await _appDbContext.TblSession.FirstOrDefaultAsync(s => s.SessionId == sessionId);
             if (session == null)
@@ -231,7 +233,7 @@ namespace ChocoLuxAPI.Controllers
             }
 
             // Find the item to update
-            var cartItem = cart.CartItems.FirstOrDefault(ci => ci.ProductId == cartItemDto.ProductId);
+            var cartItem = cart.CartItems.FirstOrDefault(ci => ci.CartItemId == cartItemId);
             if (cartItem == null)
             {
                 return NotFound("Cart item not found");
@@ -244,43 +246,20 @@ namespace ChocoLuxAPI.Controllers
 
             await _appDbContext.SaveChangesAsync();
             _logger.LogInformation("Updated item in cart: {CartItemId}", cartItem.CartItemId);
-            return Ok("Item updated successfully");
+            // Create an updated CartItemDto to return
+            var updatedCartItemDto = new CartItemDto
+            {
+                ProductId= cartItemDto.ProductId,
+                CartItemId = cartItem.CartItemId,
+                SessionId = cartItemDto.SessionId,
+                Quantity = cartItem.Quantity,
+                ProductPrice = cartItem.ProductPrice,
+                TotalPrice = cartItem.TotalPrice
+            };
+
+            return Ok(updatedCartItemDto);
+
         }
-        //[HttpPost("UpdateCartItem")]
-        //public async Task<IActionResult> UpdateCartItem([FromForm] UpdateCartItemDto updateCartItemDto)
-        //{
-        //    var cartItem = await _appDbContext.TblCartItems
-        //        .FirstOrDefaultAsync(ci => ci.CartItemId == updateCartItemDto.CartItemId);
-
-        //    if (cartItem == null)
-        //    {
-        //        return NotFound(new { Message = "Cart item not found" });
-        //    }
-
-        //    cartItem.Quantity = updateCartItemDto.Quantity;
-        //    cartItem.TotalPrice = cartItem.ProductPrice * updateCartItemDto.Quantity;
-
-        //    await _appDbContext.SaveChangesAsync();
-
-        //    return Ok(new { Message = "Cart item updated successfully" });
-        //}
-
-        //[HttpPost("RemoveCartItem")]
-        //public async Task<IActionResult> RemoveCartItem([FromForm] RemoveCartItemDto removeCartItemDto)
-        //{
-        //    var cartItem = await _appDbContext.TblCartItems
-        //        .FirstOrDefaultAsync(ci => ci.CartItemId == removeCartItemDto.CartItemId);
-
-        //    if (cartItem == null)
-        //    {
-        //        return NotFound(new { Message = "Cart item not found" });
-        //    }
-
-        //    _appDbContext.TblCartItems.Remove(cartItem);
-        //    await _appDbContext.SaveChangesAsync();
-
-        //    return Ok(new { Message = "Cart item removed successfully" });
-        //}
 
     }
 }
