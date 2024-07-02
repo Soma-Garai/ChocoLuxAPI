@@ -23,9 +23,9 @@ namespace ChocoLuxAPI.Controllers
 
         }
 
-        [HttpPost("checkout")]
+        [HttpPost("checkout/{sessionId}")]
         //[Authorize(Policy = "CheckoutPolicy")]
-        public async Task<IActionResult> Checkout([FromHeader] Guid SessionId)
+        public async Task<IActionResult> Checkout(Guid SessionId)
         {
             // Validate the user from the JWT token
             //var user = await _userManager.GetUserAsync(User);
@@ -111,10 +111,11 @@ namespace ChocoLuxAPI.Controllers
 
             // Set the total price of the order
             order.TotalPrice = TotalPrice;
-
+            //set the ExpiresAt in the Session table
+            session.ExpiresAt = DateTime.Now;
             // Save the order to the database
             _appDbContext.SaveChanges();
-
+            
             // Optionally, you can clear the cart or perform any other cleanup
             // For example, if the cart is stored in session, you can clear it here
 
