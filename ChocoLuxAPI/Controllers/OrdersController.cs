@@ -1,4 +1,5 @@
-﻿using ChocoLuxAPI.Models;
+﻿using ChocoLuxAPI.DTO;
+using ChocoLuxAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -123,8 +124,8 @@ namespace ChocoLuxAPI.Controllers
             return Ok(new { orderId = order.OrderId });
         }
 
-        [HttpGet("order/{orderId}")]
-        public IActionResult OrderConfirmation(Guid orderId)
+        [HttpGet("OrderConfirmation/{orderId}")]
+        public async Task<IActionResult> OrderConfirmation(Guid orderId)
         {
             // Retrieve the order from the database based on orderId
             var order = _appDbContext.tblOrders
@@ -136,9 +137,24 @@ namespace ChocoLuxAPI.Controllers
                 // Handle case where order is not found
                 return NotFound($"Order with ID {orderId} not found");
             }
+            // Map the order to an OrderDto
+            var orderDto = new OrderDto
+            {
+                OrderId = order.OrderId,
+                OrderDate = order.OrderDate,
+                Status = "Shipped",
+                TotalPrice = order.TotalPrice,
+                OrderDetails = order.OrderDetails.Select(od => new OrderDetailDto
+                {
+                    ProductName = od.ProductName,
+                    Quantity = od.Quantity,
+                    ProductPrice = od.ProductPrice,
+                    TotalPrice = od.TotalPrice
+                }).ToList()
+            };
 
             // Return the order details as JSON
-            return Ok(order);
+            return Ok(orderDto);
         }
 
     }
