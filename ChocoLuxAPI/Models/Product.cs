@@ -23,5 +23,7 @@ namespace ChocoLuxAPI.Models
         public Guid CategoryId { get; set; }      // Foreign key
         public Category? Category { get; set; }  // Navigation property
         public string? CategoryName { get; set; }
+
+        //public List<CartItem> CartItems { get; set; } = new List<CartItem>();
     }
 }

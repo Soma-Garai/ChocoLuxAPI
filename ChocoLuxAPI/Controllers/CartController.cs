@@ -34,6 +34,7 @@ namespace ChocoLuxAPI.Controllers
             _appDbContext = appDbContext;
             _logger = logger; 
         }
+
         [HttpPost("CreateSessionForCart/{UserId}")]
         public async Task<IActionResult> CreateSessionForCart(string userId)
         {
@@ -73,13 +74,23 @@ namespace ChocoLuxAPI.Controllers
                     SessionId = sessionId.Value,
                     UserId = userId
                 };
-
+                //saving Cart table
                 await _appDbContext.TblCart.AddAsync(cart);
                 await _appDbContext.SaveChangesAsync();
             }
+            // Check if the product is already in the cart
+            var existingCartItem = cart.CartItems.FirstOrDefault(ci => ci.ProductId == cartItemDto.ProductId);
 
-            //foreach (var cartItemDto in cartItemsDto)
-            //{
+            if (existingCartItem != null)
+            {
+                // Update quantity and total price
+                existingCartItem.Quantity += cartItemDto.Quantity;
+                existingCartItem.TotalPrice = existingCartItem.ProductPrice * existingCartItem.Quantity;
+                _appDbContext.TblCartItems.Update(existingCartItem);
+                _logger.LogInformation("Updated item in cart: {CartItemId}", existingCartItem.CartItemId);
+            }
+            else
+            {
                 // Add the new item to the cart
                 var cartItem = new CartItem
                 {
@@ -91,17 +102,13 @@ namespace ChocoLuxAPI.Controllers
                     TotalPrice = cartItemDto.ProductPrice * cartItemDto.Quantity,
                     CreatedAt = DateTime.Now
                 };
-                //cart.CartItems.Add(cartItem);
                 _appDbContext.TblCartItems.Add(cartItem);
-                _appDbContext.SaveChanges();
                 _logger.LogInformation("Added item to cart: {CartItemId}", cartItem.CartItemId);
+            }
 
-            //}
+            await _appDbContext.SaveChangesAsync();
+            return Ok(new { Message = "The Item is successfully added to the Cart" });
 
-             //saving Cart and CartItems table
-            //await _appDbContext.SaveChangesAsync();
-            //returns a message and the sessionId
-            return Ok(new { Message = "The Item is successfully added to the Cart"/*, SessionId = session.SessionId*/ });
         }
 
 
@@ -125,6 +132,7 @@ namespace ChocoLuxAPI.Controllers
             {
                 return NotFound("Cart not found");
             }
+            
             //The code iterates over each CartItem in the cart.CartItems collection, transforms each CartItem into
             //a CartItemDto, and then collects these transformed objects into a list.
             var cartItemsDto = cart.CartItems.Select(ci => new CartItemDto

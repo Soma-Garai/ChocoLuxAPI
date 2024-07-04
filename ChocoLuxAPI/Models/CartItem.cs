@@ -14,5 +14,6 @@ namespace ChocoLuxAPI.Models
         public int? TotalPrice { get; set; }
         public DateTime CreatedAt { get; set; }
         public Cart Cart { get; set; }  // Navigation property
+
     }
 }
