@@ -268,6 +268,27 @@ namespace ChocoLuxAPI.Controllers
             return Ok(updatedCartItemDto);
 
         }
+        [HttpPost("ClearCart/{sessionId}")]
+        public async Task<IActionResult> ClearCart(Guid sessionId) 
+        {
+            var cart = await _appDbContext.TblCart
+                            .Include(c => c.CartItems)
+                            .FirstOrDefaultAsync(c=> c.SessionId == sessionId);
+            // Remove all items from the cart
+            _appDbContext.TblCartItems.RemoveRange(cart.CartItems);
+            // Optionally, remove the cart itself
+            _appDbContext.TblCart.Remove(cart);
+            // Remove the session from TblSession
+            var session = await _appDbContext.TblSession
+                                .FirstOrDefaultAsync(s => s.SessionId == sessionId);
+            if (session != null)
+            {
+                _appDbContext.TblSession.Remove(session);
+            }
+            await _appDbContext.SaveChangesAsync();
+            return Ok(new { Message = "The cart has been cleared" });
+
+        }
 
     }
 }
