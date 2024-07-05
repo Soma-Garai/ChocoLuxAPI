@@ -5,6 +5,7 @@ using ChocoLuxAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -23,7 +24,7 @@ var configuration = builder.Configuration;
 //            .AllowCredentials());
 //});
 builder.Services.AddControllers();
-
+//builder.Services.AddSingleton<IActionDescriptorCollectionProvider, ActionDescriptorCollectionProvider>();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(configuration.GetConnectionString("SqlConnection")));
 builder.Services.AddIdentity<UserModel, IdentityRole>()
