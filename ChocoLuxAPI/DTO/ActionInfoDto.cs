@@ -2,6 +2,8 @@
 {
     public class ActionInfoDto
     {
-        public string ActionName { get; set; }
+        public string? ActionMethodName { get; set; }
+        /*public string HttpMethod { get; set; }*/ // Example additional property
+                                                   // Add other properties as needed
     }
 }

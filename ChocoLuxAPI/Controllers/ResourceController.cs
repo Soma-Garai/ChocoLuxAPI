@@ -24,7 +24,7 @@ namespace ChocoLuxAPI.Controllers
                 .Select(g => new ControllerInfoDto
                 {
                     ControllerName = g.Key,
-                    Actions = g.Select(ad => new ActionInfoDto { ActionName = ad.RouteValues["action"] }).ToList()
+                    ActionMethods = g.Select(ad => new ActionInfoDto { ActionMethodName = ad.RouteValues["action"] }).ToList()
                 }).ToList();
 
             return Ok(controllerInfos);

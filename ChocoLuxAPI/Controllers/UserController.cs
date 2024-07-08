@@ -81,7 +81,7 @@ namespace ChocoLuxAPI.Controllers
             var token = await _tokenGenerator.GenerateToken(user);
 
             await _appDbContext.SaveChangesAsync();
-            // Returns an Ok response with the generated JWT token and SessionId
+            // Returns an Ok response with the generated JWT token 
             return Ok(new { Token = token});
         }
 
