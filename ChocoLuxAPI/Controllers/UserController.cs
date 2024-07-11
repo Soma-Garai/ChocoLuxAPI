@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Net.Mail;
 using System.Security.Claims;
 
@@ -34,6 +35,7 @@ namespace ChocoLuxAPI.Controllers
         }
 
         [HttpPost("Register")]
+        
         public async Task<IActionResult> Register(RegisterDto model)
         {
             if (!ModelState.IsValid)
@@ -95,17 +97,36 @@ namespace ChocoLuxAPI.Controllers
             return Ok("User logged out successfully");
         }
 
-        private bool IsValidEmail(string emailaddress)
+        [Authorize]
+        [HttpGet("Details")]
+        public async Task<IActionResult> GetUserDetails()
         {
-            try
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
             {
-                var m = new MailAddress(emailaddress);
-                return true;
+                return Unauthorized("User ID not found in token.");
             }
-            catch (FormatException)
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
             {
-                return false;
+                return NotFound("User not found.");
             }
+
+            
+            var userDetails = new UserDetailsDto
+            {
+                FirstName = user.FirstName,
+                LastName= user.LastName,
+                UserName = user.UserName,
+                Email = user.Email,
+                
+            };
+
+            return Ok(userDetails);
         }
+
+
+
     }
 }
