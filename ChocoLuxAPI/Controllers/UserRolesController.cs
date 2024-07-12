@@ -1,9 +1,11 @@
 ﻿using ChocoLuxAPI.DTO;
 using ChocoLuxAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace ChocoLuxAPI.Controllers
 {
@@ -20,9 +22,15 @@ namespace ChocoLuxAPI.Controllers
             _userManager = userManager;
         }
         //To show the user with their assigned roles in a table
+        [Authorize]
         [HttpGet("UserAndTheirRolesList")]
         public async Task<IActionResult> UserAndTheirRolesList()
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return Unauthorized("User ID not found in token.");
+            }
             var users = await _userManager.Users.ToListAsync();//the token authentication is not working here yet
             var userRolesViewModel = new List<UserRolesDto>();
 
@@ -54,10 +62,16 @@ namespace ChocoLuxAPI.Controllers
             //return roles.Where(role => role != "Admin").ToList();
         }
 
+        [Authorize]
         //to modify/manage roles of each user
-        [HttpGet("manage")]
-        public async Task<IActionResult> Manage(string userId)
+        [HttpGet("ManageRoles")]
+        public async Task<IActionResult> ManageRoles()
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return Unauthorized("User ID not found in token.");
+            }
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
@@ -72,7 +86,7 @@ namespace ChocoLuxAPI.Controllers
                     RoleId = role.Id,
                     RoleName = role.Name
                 };
-                if (await _userManager.IsInRoleAsync(user, role.Name))
+                if (await _userManager.IsInRoleAsync(user, role.Name)) //this is giving error.
                 {
                     userRolesViewModel.Selected = true;
                 }

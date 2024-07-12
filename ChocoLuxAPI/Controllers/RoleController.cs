@@ -1,6 +1,10 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using ChocoLuxAPI.DTO;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Data;
+using System.Security.Claims;
 
 namespace ChocoLuxAPI.Controllers
 {
@@ -13,18 +17,40 @@ namespace ChocoLuxAPI.Controllers
         {
             _roleManager = roleManager;
         }
-
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetRole(string id)
+        //[Authorize]
+        [HttpGet("GetRoles")]
+        public IActionResult GetRoles()
         {
-            var role = await _roleManager.FindByIdAsync(id);
-            if (role == null)
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return Unauthorized("User ID not found in token.");
+            }
+            var roles = _roleManager.Roles.ToList();
+            if (roles == null)
             {
                 return NotFound("Role not found.");
             }
-
-            return Ok(role);
+            //List<RoleDto> rolesDto = roles.ToList();
+            return Ok(roles);
         }
+
+        //[HttpGet]
+        //public async Task<IActionResult> GetRole()
+        //{
+        //    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        //    if (userId == null)
+        //    {
+        //        return Unauthorized("User ID not found in token.");
+        //    }
+        //    var role = await _roleManager.FindByIdAsync(userId);
+        //    if (role == null)
+        //    {
+        //        return NotFound("Role not found.");
+        //    }
+
+        //    return Ok(role);
+        //}
 
         [HttpPost("CreateRole")]
         public async Task<IActionResult> CreateRole(string roleName)

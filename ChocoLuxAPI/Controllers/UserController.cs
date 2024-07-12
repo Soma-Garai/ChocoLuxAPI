@@ -87,14 +87,17 @@ namespace ChocoLuxAPI.Controllers
             // Returns an Ok response with the generated JWT token 
             return Ok(new { Token = token});
         }
-
+        [Authorize]
         [HttpPost("Logout")]
         public async Task<IActionResult> Logout()
         {
-            var user = await _userManager.GetUserAsync(User);
-            await _signInManager.SignOutAsync();
-
-            _logger.LogInformation("User {UserId} logged out", user.Id);
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if(userId != null)
+            {
+                var user = await _userManager.GetUserAsync(User);
+                await _signInManager.SignOutAsync();
+            }
+            _logger.LogInformation("User {UserId} logged out", userId);
             return Ok("User logged out successfully");
         }
 
