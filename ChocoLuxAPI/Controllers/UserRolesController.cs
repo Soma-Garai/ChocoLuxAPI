@@ -20,18 +20,18 @@ namespace ChocoLuxAPI.Controllers
             _userManager = userManager;
         }
         //To show the user with their assigned roles in a table
-        [HttpGet("users")]
-        public async Task<IActionResult> Index()
+        [HttpGet("UserAndTheirRolesList")]
+        public async Task<IActionResult> UserAndTheirRolesList()
         {
-            var users = await _userManager.Users.ToListAsync();
+            var users = await _userManager.Users.ToListAsync();//the token authentication is not working here yet
             var userRolesViewModel = new List<UserRolesDto>();
 
             foreach (UserModel user in users)
             {
                 // Check if the user has the "Admin" role
-                var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
-                if (!isAdmin)
-                {
+                //var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+                //if (!isAdmin)
+                //{
                     var thisViewModel = new UserRolesDto();
                     thisViewModel.UserId = user.Id;
                     thisViewModel.Email = user.Email;
@@ -39,7 +39,7 @@ namespace ChocoLuxAPI.Controllers
                     thisViewModel.LastName = user.LastName;
                     thisViewModel.Roles = await GetUserRoles(user); // gets list of role names associated with the user
                     userRolesViewModel.Add(thisViewModel);
-                }
+                //}
             }
 
             // Return the list of user roles as JSON

@@ -42,10 +42,11 @@ namespace ChocoLuxAPI.Controllers
             {
                 return BadRequest(ModelState);
             }
-
+            MailAddress address = new MailAddress(model.Email);
+            string userName = address.User;
             var user = new UserModel
             {
-                UserName = model.Email,
+                UserName = userName,
                 Email = model.Email,
                 FirstName = model.FirstName,
                 LastName = model.LastName
