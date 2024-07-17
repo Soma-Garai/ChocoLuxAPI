@@ -31,7 +31,7 @@ namespace ChocoLuxAPI.Controllers
             {
                 return Unauthorized("User ID not found in token.");
             }
-            var users = await _userManager.Users.ToListAsync();//the token authentication is not working here yet
+            var users = await _userManager.Users.ToListAsync();
             var userRolesViewModel = new List<UserRolesDto>();
 
             foreach (UserModel user in users)
@@ -42,6 +42,7 @@ namespace ChocoLuxAPI.Controllers
                 //{
                     var thisViewModel = new UserRolesDto();
                     thisViewModel.UserId = user.Id;
+                    thisViewModel.UserName= user.UserName;
                     thisViewModel.Email = user.Email;
                     thisViewModel.FirstName = user.FirstName;
                     thisViewModel.LastName = user.LastName;
@@ -63,12 +64,12 @@ namespace ChocoLuxAPI.Controllers
         }
 
         [Authorize]
+        [HttpGet("ManageRoles/{userId}/{userName}")]
         //to modify/manage roles of each user
-        [HttpGet("ManageRoles")]
-        public async Task<IActionResult> ManageRoles()
+        public async Task<IActionResult> ManageRoles(string userId ,string userName)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null)
+            var loggedInUserId = User.FindFirstValue(ClaimTypes.NameIdentifier); //logged in user id
+            if (loggedInUserId == null)
             {
                 return Unauthorized("User ID not found in token.");
             }
@@ -83,26 +84,34 @@ namespace ChocoLuxAPI.Controllers
             {
                 var userRolesViewModel = new ManageUserRolesDto
                 {
+                    UserId = userId,    //userId of the user whose manage button is clicked.
+                    UserName=userName,
                     RoleId = role.Id,
                     RoleName = role.Name
                 };
-                if (await _userManager.IsInRoleAsync(user, role.Name)) //this is giving error.
+                var roleExists = await _userManager.IsInRoleAsync(user, role.Name);
+                if(roleExists == true) //this is giving error.
                 {
-                    userRolesViewModel.Selected = true;
+                    userRolesViewModel.Selected = roleExists;
                 }
-                else
-                {
-                    userRolesViewModel.Selected = false;
-                }
+                //else
+                //{
+                //    userRolesViewModel.Selected = false;
+                //}
                 model.Add(userRolesViewModel);
             }           
             return Ok(model);
         }
 
         //UPDATE method for user role
-        [HttpPut("manage")]
-        public async Task<IActionResult> UpdateUserRoles(string userId, List<ManageUserRolesDto> model)
+        [HttpPut("ManageRoles/{userId}")]
+        public async Task<IActionResult> UpdateManageRoles(string userId, List<ManageUserRolesDto> model)
         {
+            var loggedInUserId = User.FindFirstValue(ClaimTypes.NameIdentifier); //logged in user id
+            if (loggedInUserId == null)
+            {
+                return Unauthorized("User ID not found in token.");
+            }
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
             {
@@ -122,7 +131,7 @@ namespace ChocoLuxAPI.Controllers
                 return BadRequest("Cannot add selected roles to user");
             }
 
-            return Ok("The user is updated with the Role");
+            return Ok("The user is updated with the Role/s");
         }
 
     }
