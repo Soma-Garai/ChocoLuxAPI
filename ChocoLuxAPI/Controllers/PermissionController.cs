@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace ChocoLuxAPI.Controllers
 {
@@ -22,32 +23,55 @@ namespace ChocoLuxAPI.Controllers
             _appDbContext = appDbContext;
         }
         //save the permissions in the RoleClaims table.
-        [HttpPost("SaveRoleClaims")]
-        public async Task<IActionResult> SaveRoleClaims([FromBody]List<RoleClaimDto> roleClaims)
+        [HttpPost("SavePermissions")]
+        public async Task<IActionResult> SavePermissions([FromBody] List<RoleClaimDto> roleClaims)
         {
             if (roleClaims == null || !roleClaims.Any())
             {
                 return BadRequest("No role claims provided.");
             }
 
-            foreach (var roleClaim in roleClaims)
+            // Assuming all role claims in the list are for the same role ID
+            var roleId = roleClaims.First().RoleId.ToString();
+            var role = await _roleManager.FindByIdAsync(roleId);
+            if (role == null)
             {
-                var newRoleClaim = new RoleClaim
-                {
-                    RoleId = roleClaim.RoleId,
-                    ClaimType = roleClaim.ClaimType,
-                    ClaimValue = roleClaim.ClaimValue
-                };
-
-                _appDbContext.RoleClaims.Add(newRoleClaim);
+                return NotFound($"Role with ID {roleId} not found.");
             }
 
-            await _appDbContext.SaveChangesAsync();
+            // Retrieve existing claims for the role
+            var existingClaims = await _roleManager.GetClaimsAsync(role);
+            foreach (var claim in roleClaims)
+            {
+                Console.WriteLine($"Claim Type: {claim.ClaimType}, Claim Value: {claim.ClaimValue}");
+            }
+            // Remove all existing claims
+            foreach (var claim in existingClaims)
+            {
+                var result = await _roleManager.RemoveClaimAsync(role, claim);
+                if (!result.Succeeded)
+                {
+                    return BadRequest($"Failed to remove existing claim from role with ID {roleId}: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                }
+            }
+
+            // Add the new claims
+            foreach (var roleClaim in roleClaims)
+            {
+                var result = await _roleManager.AddClaimAsync(role, new Claim(roleClaim.ClaimType, roleClaim.ClaimValue));
+                if (!result.Succeeded)
+                {
+                    return BadRequest($"Failed to add claim to role with ID {roleClaim.RoleId}: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                }
+            }
+
             return Ok("Role claims saved successfully.");
         }
+
+
     }
 
-   
+
 }
 
 
