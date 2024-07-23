@@ -3,12 +3,15 @@
 namespace ChocoLuxAPI.Permission
 {
     //The PermissionRequirement class represents a "custom authorization" requirement in an ASP.NET Core application.
-    internal class PermissionRequirement : IAuthorizationRequirement
+    public class PermissionRequirement : IAuthorizationRequirement
     {
-        public string Permission { get; private set; }
-        public PermissionRequirement(string permission)
+        public string ControllerName { get; }
+        public List<string> ActionNames { get; }
+
+        public PermissionRequirement(string controllerName, List<string> actionNames)
         {
-            Permission = permission;
+            ControllerName = controllerName;
+            ActionNames = actionNames ?? new List<string>();
         }
     }
 }

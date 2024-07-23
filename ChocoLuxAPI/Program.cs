@@ -5,10 +5,12 @@ using ChocoLuxAPI.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using System.Reflection;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -59,33 +61,32 @@ builder.Services.AddAuthentication(options =>
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["jwt:secretKey"])), // Your secret key for signing tokens              
             };
         });
-builder.Services.AddAuthorization();
-//builder.Services.AddAuthorization(options =>
-//{
-//    options.AddPolicy("AdminPolicy", policy =>
-//        policy.RequireRole("Admin"));
-//    options.AddPolicy("UserPolicy", policy =>
-//        policy.RequireRole("User"));
 
-//    options.AddPolicy("ProductCreatePolicy", policy =>
-//        policy.RequireClaim("Permission", "Products.Create"));
+builder.Services.AddAuthorization(options =>
+{
+    // Get all controller types in the assembly
+    var controllers = Assembly.GetExecutingAssembly().GetTypes()
+        .Where(type => typeof(ControllerBase).IsAssignableFrom(type))
+        .ToList();
 
-//    options.AddPolicy("ProductEditPolicy", policy =>
-//        policy.RequireClaim("Permission", "Products.Edit"));
-//    options.AddPolicy("ProductDeletePolicy", policy =>
-//        policy.RequireClaim("Permission", "Products.Delete"));
-
-//    //options.AddPolicy("CheckoutPolicy", policy =>
-//    //    policy.RequireRole("User")
-//    //          .RequireClaim("Permission", "Orders.Create"));
-//    //for OR condition use requireAssertion[To create policy with multiple requirements]
-//    options.AddPolicy("CheckoutPolicy", policy =>
-//        policy.RequireAssertion(context =>
-//        context.User.IsInRole("User") &&
-//        context.User.HasClaim(claim => claim.Type == "Permission" && claim.Value == "Orders.Create") ||
-//        context.User.IsInRole("Admin")));
-//    // Define more policies as needed
-//});
+    foreach (var policyName in from controller in controllers
+                               let controllerName = controller.Name.Replace("Controller", "")
+                               let actions = controller.GetMethods(BindingFlags.Public | BindingFlags.Instance)
+                                   .Where(m =>
+                                       (typeof(IActionResult).IsAssignableFrom(m.ReturnType) ||
+                                        typeof(Task<IActionResult>).IsAssignableFrom(m.ReturnType)) &&
+                                       m.DeclaringType == controller)
+                                   .Select(m => m.Name)
+                                   .ToList()
+                               from action in actions
+                               let actionName = action
+                               select $"{controllerName}-{actionName}")
+    {
+        options.AddPolicy(policyName, policy =>
+            policy.RequireClaim("Permission", policyName));
+    }
+});
+builder.Services.AddSingleton<IAuthorizationHandler, PermissionHandler>();
 
 builder.Services.AddScoped<TokenGenerator>();
 var app = builder.Build();

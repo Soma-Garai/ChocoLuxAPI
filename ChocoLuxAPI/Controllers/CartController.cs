@@ -54,6 +54,7 @@ namespace ChocoLuxAPI.Controllers
         }
 
         [HttpPost("AddItemToCart")]
+        [Authorize(Policy = "Cart-AddItemToCart")]
         public async Task<IActionResult> AddItemToCart([FromBody] CartOperationDto cartOperationDto)
         {
             var sessionId = cartOperationDto.SessionId;
