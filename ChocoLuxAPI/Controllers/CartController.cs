@@ -35,6 +35,7 @@ namespace ChocoLuxAPI.Controllers
             _logger = logger; 
         }
 
+        //[Authorize(Policy = "Cart-CreateSessionForCart")]
         [HttpPost("CreateSessionForCart/{UserId}")]
         public async Task<IActionResult> CreateSessionForCart(string userId)
         {
@@ -53,12 +54,19 @@ namespace ChocoLuxAPI.Controllers
             return Ok(session.SessionId);
         }
 
+        //[Authorize(Policy = "Cart-AddItemToCart")]
         [HttpPost("AddItemToCart")]
-        [Authorize(Policy = "Cart-AddItemToCart")]
         public async Task<IActionResult> AddItemToCart([FromBody] CartOperationDto cartOperationDto)
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return Unauthorized("User ID not found in token.");
+            }
+
+            _logger.LogInformation("AddItemToCart method started");
             var sessionId = cartOperationDto.SessionId;
-            var userId= cartOperationDto.UserId;
+            //var userId= cartOperationDto.UserId;
             //List<CartItemDto> cartItemsDto = cartOperationDto.CartItems;         
             var cartItemDto = cartOperationDto.CartItems;
 
@@ -112,7 +120,7 @@ namespace ChocoLuxAPI.Controllers
 
         }
 
-
+        //[Authorize(Policy = "Cart-GetCartItems")]
         [HttpGet("GetCartItems/{sessionId}")]
         public async Task<IActionResult> GetCartItems(Guid sessionId)
         {
@@ -150,6 +158,7 @@ namespace ChocoLuxAPI.Controllers
             return Ok(cartItemsDto);
         }
         //delete method for the delete button
+        //[Authorize(Policy = "Cart-RemoveItemFromCart")]
         [HttpPost("RemoveItemFromCart")]
         public async Task<IActionResult> RemoveItemFromCart(Guid sessionId, Guid cartItemId)
         {
@@ -219,6 +228,7 @@ namespace ChocoLuxAPI.Controllers
         }
 
         //update method for the javascript
+        //[Authorize(Policy = "Cart-UpdateCartItem")]
         [HttpPost("UpdateCartItem")]
         public async Task<IActionResult> UpdateCartItem(CartItemDto cartItemDto)
         {
@@ -269,6 +279,8 @@ namespace ChocoLuxAPI.Controllers
             return Ok(updatedCartItemDto);
 
         }
+
+        //[Authorize(Policy = "Cart-ClearCart")]
         [HttpPost("ClearCart/{sessionId}")]
         public async Task<IActionResult> ClearCart(Guid sessionId) 
         {

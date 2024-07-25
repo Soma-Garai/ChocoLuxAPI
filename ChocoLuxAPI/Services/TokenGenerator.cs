@@ -15,10 +15,31 @@ namespace ChocoLuxAPI.Services
     {
         private readonly IConfiguration _configuration;
         private readonly UserManager<UserModel> _userManager;
-        public TokenGenerator(IConfiguration configuration, UserManager<UserModel> userManager)
+        private readonly AppDbContext _appDbContext;
+        private readonly RoleManager<IdentityRole> _roleManager;
+        public TokenGenerator(IConfiguration configuration, UserManager<UserModel> userManager, AppDbContext appDbContext, RoleManager<IdentityRole> roleManager)
         {
             _configuration = configuration;
             _userManager = userManager;
+            _appDbContext = appDbContext;
+            _roleManager = roleManager;
+        }
+
+        private async Task<List<Claim>> GetRoleClaimsAsync(List<string> roleNames)
+        {
+            var roleClaims = new List<Claim>();
+
+            foreach (var roleName in roleNames)
+            {
+                var role = await _roleManager.FindByNameAsync(roleName);
+                if (role != null)
+                {
+                    var claims = await _roleManager.GetClaimsAsync(role);
+                    roleClaims.AddRange(claims);
+                }
+            }
+
+            return roleClaims;
         }
 
         [HttpPost]
@@ -49,11 +70,18 @@ namespace ChocoLuxAPI.Services
                 {
                     authClaims.Add(new Claim(ClaimTypes.Role, role));
                 }
+
+                // Fetch role claims using RoleManager
+                var roleClaims = await GetRoleClaimsAsync(roles.ToList());
+
+                foreach (var roleClaim in roleClaims)
+                {
+                    if (roleClaim.Type == "Permission")
+                    {
+                        authClaims.Add(roleClaim);
+                    }
+                }
             }
-            //if (additionalClaims != null)
-            //{
-            //    authClaims.AddRange(additionalClaims);
-            //}
             //creating the token with JwtSecurityToken
             var token = new JwtSecurityToken(
                     issuer: _configuration["jwt:validIssuer"],
@@ -64,21 +92,6 @@ namespace ChocoLuxAPI.Services
                     );
 
             return await Task.FromResult(new JwtSecurityTokenHandler().WriteToken(token));
-        }
-
-        public async Task<string> GenerateCartJwt(UserModel user, List<CartItemDto> cartItems)
-        {
-            var cartClaim = new Claim("cart", JsonSerializer.Serialize(cartItems));
-            return await GenerateToken(user/*, new List<Claim> { cartClaim }*/);
-        }
-
-        public List<CartItemDto> DecodeCartJwt(string token)
-        {
-            var handler = new JwtSecurityTokenHandler();
-            var jwtToken = handler.ReadJwtToken(token);
-            var cartClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "cart")?.Value;
-
-            return cartClaim != null ? JsonSerializer.Deserialize<List<CartItemDto>>(cartClaim) : new List<CartItemDto>();
         }
     }
 }

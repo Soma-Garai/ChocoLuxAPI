@@ -25,15 +25,15 @@ namespace ChocoLuxAPI.Controllers
         }
 
         [HttpPost("checkout/{sessionId}")]
-        //[Authorize(Policy = "CheckoutPolicy")]
+        [Authorize(Policy = "Orders-Checkout")]
         public async Task<IActionResult> Checkout(Guid SessionId)
         {
             // Validate the user from the JWT token
-            //var user = await _userManager.GetUserAsync(User);
-            //if (user == null)
-            //{
-            //    return Unauthorized();
-            //}
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return Unauthorized("User ID not found in token.");
+            }
 
             // Check if the session is valid
             var session = await _appDbContext.TblSession.FirstOrDefaultAsync(s => s.SessionId == SessionId);

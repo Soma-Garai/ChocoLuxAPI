@@ -68,7 +68,7 @@ builder.Services.AddAuthorization(options =>
     var controllers = Assembly.GetExecutingAssembly().GetTypes()
         .Where(type => typeof(ControllerBase).IsAssignableFrom(type))
         .ToList();
-
+    
     foreach (var policyName in from controller in controllers
                                let controllerName = controller.Name.Replace("Controller", "")
                                let actions = controller.GetMethods(BindingFlags.Public | BindingFlags.Instance)
@@ -84,10 +84,20 @@ builder.Services.AddAuthorization(options =>
     {
         options.AddPolicy(policyName, policy =>
             policy.RequireClaim("Permission", policyName));
+        Console.WriteLine(policyName);
+
     }
 });
-builder.Services.AddSingleton<IAuthorizationHandler, PermissionHandler>();
+//builder.Services.AddAuthorization(options =>
+//{
+//    options.AddPolicy("Cart-AddItemToCart", policy =>
+//        policy.RequireClaim("Permission", "Cart-AddItemToCart"));
+//});
 
+builder.Services.AddSingleton<IAuthorizationHandler, PermissionHandler>();
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
 builder.Services.AddScoped<TokenGenerator>();
 var app = builder.Build();
 

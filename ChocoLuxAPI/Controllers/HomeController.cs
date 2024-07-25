@@ -50,7 +50,7 @@ namespace ChocoLuxAPI.Controllers
 
         [HttpGet]
         [Route("chocolates")]
-        [Authorize(Policy = "Home-Chocolates")]
+        //[Authorize(Policy = "Home-Chocolates")]
         public IActionResult Chocolates([FromQuery]Guid? categoryId)
         {
             // Retrieve products from the database along with categories 

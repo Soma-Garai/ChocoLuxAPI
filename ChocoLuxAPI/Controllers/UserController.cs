@@ -120,6 +120,7 @@ namespace ChocoLuxAPI.Controllers
             
             var userDetails = new UserDetailsDto
             {
+                UserId = user.Id,
                 FirstName = user.FirstName,
                 LastName= user.LastName,
                 UserName = user.UserName,
