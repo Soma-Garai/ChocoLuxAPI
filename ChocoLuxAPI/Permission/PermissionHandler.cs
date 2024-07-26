@@ -8,41 +8,43 @@ namespace ChocoLuxAPI.Permission
 {
     public class PermissionHandler : AuthorizationHandler<PermissionRequirement> 
     {
-        private readonly ILogger<PermissionHandler> _logger;
-        public PermissionHandler(ILogger<PermissionHandler> logger)
+        //private readonly ILogger<PermissionHandler> _logger;
+        public PermissionHandler()
         {
-            _logger = logger;
         }
-        protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, PermissionRequirement requirement)
+        protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, PermissionRequirement requirement)
         {
-            var userClaims = context.User.Claims; // provides access to all claims(role & user) associated with the user.
-            // Log the user's claims
-            _logger.LogInformation("User Claims:");
-            foreach (var claim in userClaims)
-            {
-                _logger.LogInformation($"Type: {claim.Type}, Value: {claim.Value}");
-            }
-            var httpContext = context.Resource as HttpContext;
-            if (httpContext == null)
-            {
-                return;
-            }
-            var token = httpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-            var handler = new JwtSecurityTokenHandler();
-            var jwtToken = handler.ReadJwtToken(token);
-            _logger.LogInformation(token.ToString());
-            var issuer = jwtToken.Issuer;
+            //context.Succeed(requirement);
+            context.Succeed(requirement);
+            return Task.CompletedTask;
+            //var userClaims = context.User.Claims; // provides access to all claims(role & user) associated with the user.
+            //// Log the user's claims
+            //_logger.LogInformation("User Claims:");
+            //foreach (var claim in userClaims)
+            //{
+            //    _logger.LogInformation($"Type: {claim.Type}, Value: {claim.Value}");
+            //}
+            //var httpContext = context.Resource as HttpContext;
+            //if (httpContext == null)
+            //{
+            //    return;
+            //}
+            //var token = httpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+            //var handler = new JwtSecurityTokenHandler();
+            //var jwtToken = handler.ReadJwtToken(token);
+            //_logger.LogInformation(token.ToString());
+            //var issuer = jwtToken.Issuer;
 
-            // Check if the user has a permission claim for the controller and any of the actions
-            if (requirement.ActionNames.Any(action => userClaims.Any(c => c.Type == "Permission" &&
-                                                                          c.Value == $"{requirement.ControllerName}-{action}" &&
-                                                                          c.Issuer == issuer)))
-            {
-                context.Succeed(requirement);
-                //return;
-            }
+            //// Check if the user has a permission claim for the controller and any of the actions
+            //if (requirement.ActionNames.Any(action => userClaims.Any(c => c.Type == "Permission" &&
+            //                                                              c.Value == $"{requirement.ControllerName}-{action}" &&
+            //                                                              c.Issuer == issuer)))
+            //{
+            //    context.Succeed(requirement);
+            //    //return;
+            //}
 
-            await Task.Yield();
+            //await Task.Yield();
         }
     }
 }

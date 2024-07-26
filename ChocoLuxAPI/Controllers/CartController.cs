@@ -16,7 +16,7 @@ namespace ChocoLuxAPI.Controllers
 {
 
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/[controller]")] 
     public class CartController : ControllerBase
     {
         //private readonly CartService _cartService;
@@ -35,7 +35,7 @@ namespace ChocoLuxAPI.Controllers
             _logger = logger; 
         }
 
-        //[Authorize(Policy = "Cart-CreateSessionForCart")]
+       // [Authorize(Policy = "Cart-CreateSessionForCart")]
         [HttpPost("CreateSessionForCart/{UserId}")]
         public async Task<IActionResult> CreateSessionForCart(string userId)
         {
@@ -54,7 +54,7 @@ namespace ChocoLuxAPI.Controllers
             return Ok(session.SessionId);
         }
 
-        //[Authorize(Policy = "Cart-AddItemToCart")]
+        [Authorize(Policy = "Cart - AddItemToCart")]
         [HttpPost("AddItemToCart")]
         public async Task<IActionResult> AddItemToCart([FromBody] CartOperationDto cartOperationDto)
         {

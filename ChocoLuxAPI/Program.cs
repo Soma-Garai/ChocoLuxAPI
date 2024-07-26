@@ -42,7 +42,6 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 var userManager = builder.Services.AddScoped<UserManager<UserModel>>();
 var roleManager = builder.Services.AddScoped<SignInManager<UserModel>>();
-
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -62,39 +61,43 @@ builder.Services.AddAuthentication(options =>
             };
         });
 
-builder.Services.AddAuthorization(options =>
-{
-    // Get all controller types in the assembly
-    var controllers = Assembly.GetExecutingAssembly().GetTypes()
-        .Where(type => typeof(ControllerBase).IsAssignableFrom(type))
-        .ToList();
-    
-    foreach (var policyName in from controller in controllers
-                               let controllerName = controller.Name.Replace("Controller", "")
-                               let actions = controller.GetMethods(BindingFlags.Public | BindingFlags.Instance)
-                                   .Where(m =>
-                                       (typeof(IActionResult).IsAssignableFrom(m.ReturnType) ||
-                                        typeof(Task<IActionResult>).IsAssignableFrom(m.ReturnType)) &&
-                                       m.DeclaringType == controller)
-                                   .Select(m => m.Name)
-                                   .ToList()
-                               from action in actions
-                               let actionName = action
-                               select $"{controllerName}-{actionName}")
-    {
-        options.AddPolicy(policyName, policy =>
-            policy.RequireClaim("Permission", policyName));
-        Console.WriteLine(policyName);
-
-    }
-});
 //builder.Services.AddAuthorization(options =>
 //{
-//    options.AddPolicy("Cart-AddItemToCart", policy =>
-//        policy.RequireClaim("Permission", "Cart-AddItemToCart"));
-//});
+//    // Get all controller types in the assembly
+//    var controllers = Assembly.GetExecutingAssembly().GetTypes()
+//        .Where(type => typeof(ControllerBase).IsAssignableFrom(type))
+//        .ToList();
 
-builder.Services.AddSingleton<IAuthorizationHandler, PermissionHandler>();
+//    foreach (var policyName in from controller in controllers
+//                               let controllerName = controller.Name.Replace("Controller", "")
+//                               let actions = controller.GetMethods(BindingFlags.Public | BindingFlags.Instance)
+//                                   .Where(m =>
+//                                       (typeof(IActionResult).IsAssignableFrom(m.ReturnType) ||
+//                                        typeof(Task<IActionResult>).IsAssignableFrom(m.ReturnType)) &&
+//                                       m.DeclaringType == controller)
+//                                   .Select(m => m.Name)
+//                                   .ToList()
+//                               from action in actions
+//                               let actionName = action
+//                               select $"{controllerName}-{actionName}")
+//    {
+//        options.AddPolicy(policyName, policy =>
+//            policy.RequireClaim("Permission", policyName));
+//        Console.WriteLine(policyName);
+
+//    }
+//});
+builder.Services.AddAuthorization(options =>
+{
+    //options.AddPolicy("Cart-AddItemToCart", policy =>
+    //                       policy.RequireClaim("Permission", "Cart-AddItemToCart"));
+    options.AddPolicy("Cart - AddItemToCart", policy =>
+                           policy.RequireClaim("Permission", "Cart - AddItemToCart"));
+});
+
+builder.Services.AddScoped<IAuthorizationHandler, PermissionHandler>();
+
+
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();

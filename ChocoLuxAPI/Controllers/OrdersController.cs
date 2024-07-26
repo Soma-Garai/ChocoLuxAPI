@@ -25,7 +25,7 @@ namespace ChocoLuxAPI.Controllers
         }
 
         [HttpPost("checkout/{sessionId}")]
-        [Authorize(Policy = "Orders-Checkout")]
+        [Authorize(Policy = "Orders - Checkout")]
         public async Task<IActionResult> Checkout(Guid SessionId)
         {
             // Validate the user from the JWT token
