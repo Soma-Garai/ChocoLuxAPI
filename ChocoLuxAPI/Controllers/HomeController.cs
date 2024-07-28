@@ -47,7 +47,7 @@ namespace ChocoLuxAPI.Controllers
 
         //    return Ok();
         //}
-
+        //get all the products
         [HttpGet]
         [Route("chocolates")]
         //[Authorize(Policy = "Home-Chocolates")]
