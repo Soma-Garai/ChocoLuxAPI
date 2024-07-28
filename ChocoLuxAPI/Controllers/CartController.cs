@@ -35,10 +35,15 @@ namespace ChocoLuxAPI.Controllers
             _logger = logger; 
         }
 
-       // [Authorize(Policy = "Cart-CreateSessionForCart")]
-        [HttpPost("CreateSessionForCart/{UserId}")]
-        public async Task<IActionResult> CreateSessionForCart(string userId)
+        [Authorize(Policy = "Cart - CreateSessionForCart")]
+        [HttpPost("CreateSessionForCart")]
+        public async Task<IActionResult> CreateSessionForCart()
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return Unauthorized("User ID not found in token.");
+            }
             // Create a new session
             var session = new Session
             {
@@ -120,10 +125,15 @@ namespace ChocoLuxAPI.Controllers
 
         }
 
-        //[Authorize(Policy = "Cart-GetCartItems")]
+        [Authorize(Policy = "Cart - GetCartItems")]
         [HttpGet("GetCartItems/{sessionId}")]
         public async Task<IActionResult> GetCartItems(Guid sessionId)
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return Unauthorized("User ID not found in token.");
+            }
             // Check if the session is valid
             var session = await _appDbContext.TblSession.FirstOrDefaultAsync(s => s.SessionId == sessionId);
             if (session == null)
@@ -158,7 +168,7 @@ namespace ChocoLuxAPI.Controllers
             return Ok(cartItemsDto);
         }
         //delete method for the delete button
-        //[Authorize(Policy = "Cart-RemoveItemFromCart")]
+        [Authorize(Policy = "Cart - RemoveItemFromCart")]
         [HttpPost("RemoveItemFromCart")]
         public async Task<IActionResult> RemoveItemFromCart(Guid sessionId, Guid cartItemId)
         {
@@ -192,6 +202,7 @@ namespace ChocoLuxAPI.Controllers
             return Ok(new { Message = "Item removed from cart" });
         }
         //delete method for the javascript
+        [Authorize(Policy = "Cart - RemoveFromCart")]
         [HttpPost("RemoveFromCart")]
         public async Task<IActionResult> RemoveFromCart(Guid sessionId, Guid cartItemId)
         {
@@ -228,7 +239,7 @@ namespace ChocoLuxAPI.Controllers
         }
 
         //update method for the javascript
-        //[Authorize(Policy = "Cart-UpdateCartItem")]
+        [Authorize(Policy = "Cart - UpdateCartItem")]
         [HttpPost("UpdateCartItem")]
         public async Task<IActionResult> UpdateCartItem(CartItemDto cartItemDto)
         {
@@ -280,7 +291,7 @@ namespace ChocoLuxAPI.Controllers
 
         }
 
-        //[Authorize(Policy = "Cart-ClearCart")]
+        [Authorize(Policy = "Cart - ClearCart")]
         [HttpPost("ClearCart/{sessionId}")]
         public async Task<IActionResult> ClearCart(Guid sessionId) 
         {

@@ -61,39 +61,51 @@ builder.Services.AddAuthentication(options =>
             };
         });
 
-//builder.Services.AddAuthorization(options =>
-//{
-//    // Get all controller types in the assembly
-//    var controllers = Assembly.GetExecutingAssembly().GetTypes()
-//        .Where(type => typeof(ControllerBase).IsAssignableFrom(type))
-//        .ToList();
-
-//    foreach (var policyName in from controller in controllers
-//                               let controllerName = controller.Name.Replace("Controller", "")
-//                               let actions = controller.GetMethods(BindingFlags.Public | BindingFlags.Instance)
-//                                   .Where(m =>
-//                                       (typeof(IActionResult).IsAssignableFrom(m.ReturnType) ||
-//                                        typeof(Task<IActionResult>).IsAssignableFrom(m.ReturnType)) &&
-//                                       m.DeclaringType == controller)
-//                                   .Select(m => m.Name)
-//                                   .ToList()
-//                               from action in actions
-//                               let actionName = action
-//                               select $"{controllerName}-{actionName}")
-//    {
-//        options.AddPolicy(policyName, policy =>
-//            policy.RequireClaim("Permission", policyName));
-//        Console.WriteLine(policyName);
-
-//    }
-//});
 builder.Services.AddAuthorization(options =>
 {
-    //options.AddPolicy("Cart-AddItemToCart", policy =>
-    //                       policy.RequireClaim("Permission", "Cart-AddItemToCart"));
-    options.AddPolicy("Cart - AddItemToCart", policy =>
-                           policy.RequireClaim("Permission", "Cart - AddItemToCart"));
+    // Get all controller types in the assembly
+    var controllers = Assembly.GetExecutingAssembly().GetTypes()
+        .Where(type => typeof(ControllerBase).IsAssignableFrom(type))
+        .ToList();
+
+    foreach (var policyName in from controller in controllers
+                               let controllerName = controller.Name.Replace("Controller", "")
+                               let actions = controller.GetMethods(BindingFlags.Public | BindingFlags.Instance)
+                                   .Where(m =>
+                                       (typeof(IActionResult).IsAssignableFrom(m.ReturnType) ||
+                                        typeof(Task<IActionResult>).IsAssignableFrom(m.ReturnType)) &&
+                                       m.DeclaringType == controller)
+                                   .Select(m => m.Name)
+                                   .ToList()
+                               from action in actions
+                               let actionName = action
+                               select $"{controllerName} - {actionName}")
+    {
+        options.AddPolicy(policyName, policy =>
+            policy.RequireClaim("Permission", policyName));
+        Console.WriteLine(policyName);
+
+    }
 });
+//builder.Services.AddAuthorization(options =>
+//{
+//    //options.AddPolicy("Cart-AddItemToCart", policy =>
+//    //                       policy.RequireClaim("Permission", "Cart-AddItemToCart"));
+//    options.AddPolicy("Cart - AddItemToCart", policy =>
+//                           policy.RequireClaim("Permission", "Cart - AddItemToCart"));
+//    options.AddPolicy("Cart - CreateSessionForCart", policy =>
+//                           policy.RequireClaim("Permission", "Cart - CreateSessionForCart"));
+//    options.AddPolicy("Cart - GetCartItems", policy =>
+//                           policy.RequireClaim("Permission", "Cart - GetCartItems"));
+//    options.AddPolicy("Cart - RemoveItemFromCart", policy =>
+//                           policy.RequireClaim("Permission", "Cart - RemoveItemFromCart"));
+//    options.AddPolicy("Cart - RemoveFromCart", policy =>
+//                           policy.RequireClaim("Permission", "Cart - RemoveFromCart"));
+//    options.AddPolicy("Cart - UpdateCartItem", policy =>
+//                           policy.RequireClaim("Permission", "Cart - UpdateCartItem"));
+//    options.AddPolicy("Cart - ClearCart", policy =>
+//                           policy.RequireClaim("Permission", "Cart - ClearCart"));
+//});
 
 builder.Services.AddScoped<IAuthorizationHandler, PermissionHandler>();
 
