@@ -15,9 +15,7 @@ namespace ChocoLuxAPI.Permission
         }
         protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, PermissionRequirement requirement)
         {
-            //context.Succeed(requirement);
-            //context.Succeed(requirement);
-            //return Task.CompletedTask;
+            
             var userClaims = context.User.Claims; // provides access to all claims(role & user) associated with the user.
             // Log the user's claims
             _logger.LogInformation("User Claims:");

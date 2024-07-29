@@ -4,12 +4,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace ChocoLuxAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [AllowAnonymous]
+    
     public class HomeController : ControllerBase
     {
         private readonly ILogger<HomeController> _logger;
@@ -19,7 +20,7 @@ namespace ChocoLuxAPI.Controllers
             _logger = logger;
             _appDbContext = appDbContext;
         }
-
+        [AllowAnonymous]
         [HttpGet]
         [Route("index")]  //allProducts
         public IActionResult Index()
@@ -48,9 +49,10 @@ namespace ChocoLuxAPI.Controllers
         //    return Ok();
         //}
         //get all the products
+        [AllowAnonymous]
         [HttpGet]
         [Route("chocolates")]
-        //[Authorize(Policy = "Home-Chocolates")]
+        //does not have to be authorized to view chocolates.
         public IActionResult Chocolates([FromQuery]Guid? categoryId)
         {
             // Retrieve products from the database along with categories 
@@ -85,11 +87,16 @@ namespace ChocoLuxAPI.Controllers
 
         //    return Ok();
         //}
-
+        //[Authorize(Policy = "Home - GetCategories")]
         [HttpGet]
         [Route("api/categories")]
         public IActionResult GetCategories()
         {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return Unauthorized("User ID not found in token.");
+            }
             var categories = _appDbContext.tblCategories.ToList(); 
             return Ok(categories);
         }

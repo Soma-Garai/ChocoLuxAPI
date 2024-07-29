@@ -7,12 +7,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Chronos.ApiResponse;
+using System.Security.Claims;
 
 namespace ChocoLuxAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [AllowAnonymous]
     public class ProductController : ControllerBase
     {
         private readonly ILogger<ProductController> _logger;
@@ -75,6 +75,7 @@ namespace ChocoLuxAPI.Controllers
             }
         }
 
+        [Authorize(Policy = "Product - AddProduct")]
         [HttpPost("AddProduct")]
         public async Task<IActionResult> AddProduct([FromForm] ProductDto productDto)
         {
@@ -82,7 +83,11 @@ namespace ChocoLuxAPI.Controllers
             {
                 return BadRequest(ModelState);
             }
-
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+            {
+                return Unauthorized("User ID not found in token.");
+            }
             string productImagePath = null;
             string serverFolder = "";
 
