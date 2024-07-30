@@ -24,7 +24,9 @@ namespace ChocoLuxAPI.Controllers
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly TokenGenerator _tokenGenerator;
         private readonly ILogger<UserController> _logger;
-        public UserController(SignInManager<UserModel> signInManager, UserManager<UserModel> userManager, AppDbContext appDbContext, IHttpContextAccessor contextAccessor, TokenGenerator tokenGenerator, ILogger<UserController> logger)
+        public UserController(SignInManager<UserModel> signInManager, UserManager<UserModel> userManager, 
+            AppDbContext appDbContext, IHttpContextAccessor contextAccessor, TokenGenerator tokenGenerator, 
+            ILogger<UserController> logger)
         {
             _signInManager = signInManager;
             _userManager = userManager;
@@ -116,8 +118,9 @@ namespace ChocoLuxAPI.Controllers
             {
                 return NotFound("User not found.");
             }
+            var userRoles = await _userManager.GetRolesAsync(user);
+            var userRole = userRoles.FirstOrDefault(); // Assuming you want the first role
 
-            
             var userDetails = new UserDetailsDto
             {
                 UserId = user.Id,
@@ -125,7 +128,7 @@ namespace ChocoLuxAPI.Controllers
                 LastName= user.LastName,
                 UserName = user.UserName,
                 Email = user.Email,
-                
+                UserRole = userRole
             };
 
             return Ok(userDetails);
