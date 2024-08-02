@@ -10,6 +10,7 @@ namespace ChocoLuxAPI.Models
         public DateTime OrderDate { get; set; }
         public OrderStatus Status { get; set; }  // Added OrderStatus property
         public int? TotalPrice { get; set; }  // Total price of the entire order
+        /*public string? PaymentStatus { get; set; }*/  // New PaymentStatus property
         public enum OrderStatus
         {
             Shipped,           //0
@@ -19,5 +20,6 @@ namespace ChocoLuxAPI.Models
 
         // Navigation property for order details
         public List<OrderDetails> OrderDetails { get; set; }
+        public List<Payment> Payments { get; set; }
     }
 }

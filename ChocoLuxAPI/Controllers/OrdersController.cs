@@ -25,7 +25,7 @@ namespace ChocoLuxAPI.Controllers
         }
 
         [HttpPost("checkout/{sessionId}")]
-        [Authorize(Policy = "Orders - Checkout")]
+        //[Authorize(Policy = "Orders - Checkout")]
         public async Task<IActionResult> Checkout(Guid SessionId)
         {
             // Validate the user from the JWT token
@@ -44,12 +44,6 @@ namespace ChocoLuxAPI.Controllers
 
             // Retrieve userId from session
             var userIdFromSession = session.UserId;
-
-            //// Verify that the userId from session matches the authenticated user
-            //if (userIdFromSession != user.Id)
-            //{
-            //    return Unauthorized("User ID mismatch");
-            //}
 
             // Find the cart for the session
             var cart = await _appDbContext.TblCart
@@ -116,16 +110,15 @@ namespace ChocoLuxAPI.Controllers
             session.ExpiresAt = DateTime.Now;
             // Save the order to the database
             _appDbContext.SaveChanges();
-            
-            // Optionally, you can clear the cart or perform any other cleanup
-            // For example, if the cart is stored in session, you can clear it here
 
             // Return a response indicating the successful checkout and the order ID
             return Ok(new { orderId = order.OrderId });
         }
 
-        [HttpGet("OrderConfirmation/{orderId}")]
-        public async Task<IActionResult> OrderConfirmation(Guid orderId)
+
+
+        [HttpGet("OrderConfirmation/{orderId}/{paymentType}")] 
+        public async Task<IActionResult> OrderConfirmation(Guid orderId,string paymentType)
         {
             // Retrieve the order from the database based on orderId
             var order = _appDbContext.tblOrders
@@ -142,7 +135,8 @@ namespace ChocoLuxAPI.Controllers
             {
                 OrderId = order.OrderId,
                 OrderDate = order.OrderDate,
-                Status = "Shipped",
+                Status = "Order Confirmed",
+                PaymentStatus=paymentType,
                 TotalPrice = order.TotalPrice,
                 OrderDetails = order.OrderDetails.Select(od => new OrderDetailDto
                 {
@@ -152,7 +146,15 @@ namespace ChocoLuxAPI.Controllers
                     TotalPrice = od.TotalPrice
                 }).ToList()
             };
-
+            //update the OrderId in the Payment table here,it was null before
+            // Update the Payment record to link to this order and set the payment status
+            var payment = _appDbContext.TblPayment.FirstOrDefault(p => p.OrderId == null && p.PaymentType == paymentType);
+            if (payment != null)
+            {
+                payment.OrderId = orderId;
+                payment.PaymentStatus = paymentType.Equals("Cash On Delivery", StringComparison.OrdinalIgnoreCase) ? "Pending" : "Paid";
+                await _appDbContext.SaveChangesAsync();
+            }
             // Return the order details as JSON
             return Ok(orderDto);
         }

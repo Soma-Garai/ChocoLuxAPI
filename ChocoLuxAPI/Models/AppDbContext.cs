@@ -18,6 +18,7 @@ namespace ChocoLuxAPI.Models
         public DbSet<Cart> TblCart { get; set; }
         public DbSet<CartItem> TblCartItems { get; set; }
         public DbSet<Session> TblSession { get; set; }
+        public DbSet<Payment> TblPayment { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -54,6 +55,13 @@ namespace ChocoLuxAPI.Models
             {
                 userToken.HasKey(ut => new { ut.UserId, ut.LoginProvider, ut.Name });
             });
+            // Configure one-to-many relationship between Order and Payment
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.Orders)
+                .WithMany(o => o.Payments)
+                .HasForeignKey(p => p.OrderId);
+
+            
 
             // Seed categories
             modelBuilder.Entity<Category>().HasData(
