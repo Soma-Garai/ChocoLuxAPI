@@ -1,4 +1,6 @@
-﻿namespace ChocoLuxAPI.DTO
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace ChocoLuxAPI.DTO
 {
     public class PaymentDetailsDto
     {
@@ -11,5 +13,8 @@
         public DateTime? ExpiryDate { get; set; }
         public string? CVV { get; set; }
         public string? UPIID { get; set; }
+        public string? BankName { get; set; }
+        public int? AccountNumber { get; set; }
+        public string? CustomerID { get; set; }
     }
 }
