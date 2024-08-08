@@ -52,7 +52,7 @@ namespace ChocoLuxAPI.Controllers
         //    return Ok(role);
         //}
 
-        [HttpPost("CreateRole")]
+        [HttpPost("CreateRole/{roleName}")]
         public async Task<IActionResult> CreateRole(string roleName)
         {
             if (string.IsNullOrWhiteSpace(roleName))
@@ -77,10 +77,10 @@ namespace ChocoLuxAPI.Controllers
         }
         
 
-        [HttpPut("UpdateRole/{id}")]
-        public async Task<IActionResult> UpdateRole(string id, string name)
+        [HttpPut("UpdateRole/{roleId}/{name}")]
+        public async Task<IActionResult> UpdateRole(string roleId, string name)
         {
-            var role = await _roleManager.FindByIdAsync(id);
+            var role = await _roleManager.FindByIdAsync(roleId);
             if (role == null)
             {
                 return NotFound("Role not found.");
@@ -97,10 +97,10 @@ namespace ChocoLuxAPI.Controllers
             return Ok("Role updated successfully.");
         }       
 
-        [HttpDelete("DeleteRole/{id}")]
-        public async Task<IActionResult> DeleteRole(string id)
+        [HttpDelete("DeleteRole/{roleId}")]
+        public async Task<IActionResult> DeleteRole(string roleId)
         {
-            var role = await _roleManager.FindByIdAsync(id);
+            var role = await _roleManager.FindByIdAsync(roleId);
             if (role == null)
             {
                 return NotFound("Role not found.");
