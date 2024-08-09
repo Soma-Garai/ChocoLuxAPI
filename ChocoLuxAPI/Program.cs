@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Stripe;
 using System.Reflection;
 using System.Text;
 
@@ -108,6 +109,9 @@ builder.Services.AddAuthorization(options =>
 //});
 
 builder.Services.AddScoped<IAuthorizationHandler, PermissionHandler>();
+
+builder.Services.Configure<MailSettings>(configuration.GetSection("MailSettings"));
+builder.Services.AddTransient<IMailService,MailService>();
 
 
 builder.Logging.ClearProviders();
