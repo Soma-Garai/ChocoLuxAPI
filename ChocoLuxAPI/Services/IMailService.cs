@@ -6,5 +6,6 @@ namespace ChocoLuxAPI.Services
     {
         Task SendEmailAsync(MailRequest mailRequest);
         Task SendWelcomeEmailAsync(WelcomeRequest request);
+        Task OrderConfirmationEmailAsync(MailOrderConfirmation request);
     }
 }

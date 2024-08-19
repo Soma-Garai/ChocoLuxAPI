@@ -44,5 +44,19 @@ namespace ChocoLuxAPI.Controllers
                 throw;
             }
         }
+        [HttpPost("orderConfirmationMail")]
+        public async Task<IActionResult> OrderConfirmationMail([FromForm] MailOrderConfirmation request)
+        {
+            try
+            {
+                await _mailService.OrderConfirmationEmailAsync(request);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
     }
 }
