@@ -1,0 +1,13 @@
+﻿/* Custom CSS for navbar dropdown */
+.navbar-nav .dropdown-menu {
+    margin-top: 0;
+    border-radius: 0;
+}
+
+    .navbar-nav .dropdown-menu .dropdown-item {
+        color: #333;
+    }
+
+        .navbar-nav .dropdown-menu .dropdown-item:hover {
+            background-color: #f8f9fa;
+        }

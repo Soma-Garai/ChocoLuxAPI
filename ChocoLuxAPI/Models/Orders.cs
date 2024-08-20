@@ -21,5 +21,6 @@ namespace ChocoLuxAPI.Models
         // Navigation property for order details
         public List<OrderDetails> OrderDetails { get; set; }
         public List<Payment> Payments { get; set; }
+        //public Payment Payment { get; set; } // Navigation property for Payment
     }
 }

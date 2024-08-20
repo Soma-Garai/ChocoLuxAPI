@@ -18,6 +18,6 @@ namespace ChocoLuxAPI.Models
         public Guid OrderId { get; set; }
         // Navigation property
         public Orders? Orders { get; set; }
-        //public Products? Products { get; set; }
+        //public Product? Products { get; set; }
     }
 }

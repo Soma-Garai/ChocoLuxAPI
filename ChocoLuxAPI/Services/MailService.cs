@@ -90,23 +90,22 @@ namespace ChocoLuxAPI.Services
         //    await smtp.SendAsync(email);
         //    smtp.Disconnect(true);
         //}
-        public async Task OrderConfirmationEmailAsync(MailOrderConfirmation request /*,int orderId*/)
+        public async Task OrderConfirmationEmailAsync(Guid orderId)
         {
-            // Fetch order and order details from the database
-            //var order = await _context.tblOrders
-            //    .Include(o => o.OrderDetails)
-            //    .ThenInclude(od => od.P)
-            //    .Where(o => o.OrderId == request.OrderId)
-            //    .FirstOrDefaultAsync();
             // Retrieve the order from the database based on orderId
             var order = _context.tblOrders
                               .Include(o => o.OrderDetails) // Include OrderDetails for this order
-                              .FirstOrDefault(o => o.OrderId == request.OrderId);
+                              .FirstOrDefault(o => o.OrderId == orderId);
             if (order == null)
             {
                 throw new Exception("Order not found");
             }
+            var payment = _context.TblPayment.FirstOrDefault(p => p.OrderId == orderId);
 
+            if (payment == null)
+            {
+                throw new Exception("Payment details not found");
+            }
             // Load the email template
             string FilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Templates", "OrderConfirmation.cshtml");
             string MailText;
@@ -115,29 +114,29 @@ namespace ChocoLuxAPI.Services
             {
                 MailText = await str.ReadToEndAsync();
             }
-
+            
             // Replace placeholders with actual values
             MailText = MailText
-                .Replace("[username]", request.UserName) // Assuming you have UserName in Orders table
-                .Replace("[email]", request.ToEmail) // Assuming you have Email in Orders table
+                .Replace("[username]", "Soma") 
+                .Replace("[email]", "soma@pitangent.com") 
                 .Replace("[OrderId]", order.OrderId.ToString())
                 .Replace("[OrderDate]", order.OrderDate.ToString("yyyy-MM-dd HH:mm:ss"))
-                //.Replace("[OrderStatus]", order.Status)
-                //.Replace("[PaymentStatus]", order.PaymentStatus == "Cash On Delivery" ? "Pending" : $"Paid by {order.PaymentStatus}")
-                .Replace("[TotalPrice]", order.TotalPrice.ToString("C"));
+                .Replace("[OrderStatus]", "Order Confirmed")
+                .Replace("[PaymentStatus]",payment.PaymentStatus /*== "Cash On Delivery" ? "Pending" : $"Paid by {order.Payment.PaymentStatus}"*/)
+                .Replace("[TotalPrice]", order.TotalPrice.ToString());
 
             // Build the order items table
             string orderItemsHtml = "";
             foreach (var item in order.OrderDetails)
             {
-                orderItemsHtml += $"<tr><td>{item.Product.Name}</td><td>{item.Quantity}</td><td>{item.ProductPrice:C}</td><td>{item.TotalPrice:C}</td></tr>";
+                orderItemsHtml += $"<tr><td>{item.ProductName}</td><td>{item.Quantity}</td><td>{item.ProductPrice:C}</td><td>{item.TotalPrice:C}</td></tr>";
             }
             MailText = MailText.Replace("[OrderItems]", orderItemsHtml);
 
             // Create email message
             var email = new MimeMessage();
             email.Sender = MailboxAddress.Parse(_mailSettings.Mail);
-            email.To.Add(MailboxAddress.Parse(order.Email)); // Assuming the order has the user's email
+            email.To.Add(MailboxAddress.Parse("soma@pitangent.com")); // Assuming the order has the user's email
             email.Subject = $"Order Confirmation - Order #{order.OrderId}";
 
             var builder = new BodyBuilder

@@ -118,6 +118,7 @@ builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 builder.Services.AddScoped<TokenGenerator>();
+builder.Services.AddScoped<MailService>();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

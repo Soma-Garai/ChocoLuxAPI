@@ -1,5 +1,6 @@
 ﻿using ChocoLuxAPI.DTO;
 using ChocoLuxAPI.Models;
+using ChocoLuxAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -17,11 +18,12 @@ namespace ChocoLuxAPI.Controllers
     {
         private readonly AppDbContext _appDbContext;
         private readonly UserManager<UserModel> _userManager;
-        public OrdersController(AppDbContext appDbContext, UserManager<UserModel> userManager)
+        private readonly MailService _mailService;
+        public OrdersController(AppDbContext appDbContext, UserManager<UserModel> userManager, MailService mailService)
         {
             _appDbContext = appDbContext;
             _userManager = userManager;
-
+            _mailService = mailService;
         }
 
         [HttpPost("checkout/{sessionId}")]
@@ -155,6 +157,8 @@ namespace ChocoLuxAPI.Controllers
                 payment.PaymentStatus = paymentType.Equals("Cash On Delivery", StringComparison.OrdinalIgnoreCase) ? "Pending" : "Paid";
                 await _appDbContext.SaveChangesAsync();
             }
+            // Send the order confirmation email
+             await _mailService.OrderConfirmationEmailAsync(orderId);
             // Return the order details as JSON
             return Ok(orderDto);
         }
