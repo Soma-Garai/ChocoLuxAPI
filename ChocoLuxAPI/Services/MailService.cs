@@ -49,17 +49,17 @@ namespace ChocoLuxAPI.Services
             smtp.Disconnect(true);
         }
 
-        public async Task SendWelcomeEmailAsync(WelcomeRequest request)
+        public async Task SendWelcomeEmailAsync(string userName)
         {
             string FilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Templates", "WelcomeTemplate.cshtml");
             StreamReader str = new StreamReader(FilePath);
             string MailText = str.ReadToEnd();
             str.Close();
-            MailText = MailText.Replace("[username]", request.UserName).Replace("[email]", request.ToEmail);
+            MailText = MailText.Replace("[username]", userName);
             var email = new MimeMessage();
             email.Sender = MailboxAddress.Parse(_mailSettings.Mail);
-            email.To.Add(MailboxAddress.Parse(request.ToEmail));
-            email.Subject = $"Welcome {request.UserName}";
+            email.To.Add(MailboxAddress.Parse("soma@pitangent.com"));
+            email.Subject = $"Welcome {userName}";
             var builder = new BodyBuilder();
             builder.HtmlBody = MailText;
             email.Body = builder.ToMessageBody();
@@ -70,26 +70,6 @@ namespace ChocoLuxAPI.Services
             smtp.Disconnect(true);
         }
 
-        //public async Task OrderConfirmationEmailAsync(MailOrderConfirmation request)
-        //{
-        //    string FilePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Templates", "OrderConfirmation.cshtml");
-        //    StreamReader str = new StreamReader(FilePath);
-        //    string MailText = str.ReadToEnd();
-        //    str.Close();
-        //    MailText = MailText.Replace("[username]", request.UserName).Replace("[email]", request.ToEmail);
-        //    var email = new MimeMessage();
-        //    email.Sender = MailboxAddress.Parse(_mailSettings.Mail);
-        //    email.To.Add(MailboxAddress.Parse(request.ToEmail));
-        //    email.Subject = $"Welcome {request.UserName}";
-        //    var builder = new BodyBuilder();
-        //    builder.HtmlBody = MailText;
-        //    email.Body = builder.ToMessageBody();
-        //    using var smtp = new SmtpClient();
-        //    smtp.Connect(_mailSettings.Host, _mailSettings.Port, SecureSocketOptions.StartTls);
-        //    smtp.Authenticate(_mailSettings.Mail, _mailSettings.Password);
-        //    await smtp.SendAsync(email);
-        //    smtp.Disconnect(true);
-        //}
         public async Task OrderConfirmationEmailAsync(Guid orderId)
         {
             // Retrieve the order from the database based on orderId
@@ -123,6 +103,7 @@ namespace ChocoLuxAPI.Services
                 .Replace("[OrderDate]", order.OrderDate.ToString("yyyy-MM-dd HH:mm:ss"))
                 .Replace("[OrderStatus]", "Order Confirmed")
                 .Replace("[PaymentStatus]",payment.PaymentStatus /*== "Cash On Delivery" ? "Pending" : $"Paid by {order.Payment.PaymentStatus}"*/)
+                .Replace("[PaymentStatus]", payment.PaymentType)
                 .Replace("[TotalPrice]", order.TotalPrice.ToString());
 
             // Build the order items table

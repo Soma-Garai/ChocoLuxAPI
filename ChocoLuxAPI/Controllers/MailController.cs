@@ -30,20 +30,20 @@ namespace ChocoLuxAPI.Controllers
 
         }
 
-        [HttpPost("welcome")]
-        public async Task<IActionResult> SendWelcomeMail([FromForm] WelcomeRequest request)
-        {
-            try
-            {
-                await _mailService.SendWelcomeEmailAsync(request); //request = username and ToEmail
-                return Ok();
-            }
-            catch (Exception ex)
-            {
+        //[HttpPost("welcome")]
+        //public async Task<IActionResult> SendWelcomeMail([FromForm] WelcomeRequest request)
+        //{
+        //    try
+        //    {
+        //        await _mailService.SendWelcomeEmailAsync(request); //request = username and ToEmail
+        //        return Ok();
+        //    }
+        //    catch (Exception ex)
+        //    {
 
-                throw;
-            }
-        }
+        //        throw;
+        //    }
+        //}
         //[HttpPost("orderConfirmationMail")]
         //public async Task<IActionResult> OrderConfirmationMail(/*[FromForm] MailOrderConfirmation request*/)
         //{

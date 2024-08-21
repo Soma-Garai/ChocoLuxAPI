@@ -24,9 +24,10 @@ namespace ChocoLuxAPI.Controllers
         private readonly IHttpContextAccessor _contextAccessor;
         private readonly TokenGenerator _tokenGenerator;
         private readonly ILogger<UserController> _logger;
+        private readonly MailService _mailService;
         public UserController(SignInManager<UserModel> signInManager, UserManager<UserModel> userManager, 
             AppDbContext appDbContext, IHttpContextAccessor contextAccessor, TokenGenerator tokenGenerator, 
-            ILogger<UserController> logger)
+            ILogger<UserController> logger, MailService mailService)
         {
             _signInManager = signInManager;
             _userManager = userManager;
@@ -34,6 +35,7 @@ namespace ChocoLuxAPI.Controllers
             _contextAccessor = contextAccessor;
             _tokenGenerator = tokenGenerator;
             _logger = logger;
+            _mailService = mailService;
         }
 
         [HttpPost("Register")]
@@ -58,6 +60,8 @@ namespace ChocoLuxAPI.Controllers
             if (result.Succeeded)
             {
                 await _signInManager.SignInAsync(user, isPersistent: false);
+                //call the email service here.
+                await _mailService.SendWelcomeEmailAsync(userName);
                 return Ok("Registration successful.");
             }
 
