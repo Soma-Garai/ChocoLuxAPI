@@ -59,6 +59,7 @@ namespace ChocoLuxAPI.Controllers
             var result = await _userManager.CreateAsync(user, model.Password);
             if (result.Succeeded)
             {
+                await _userManager.AddToRoleAsync(user, "User");
                 await _signInManager.SignInAsync(user, isPersistent: false);
                 //call the email service here.
                 await _mailService.SendWelcomeEmailAsync(userName);
@@ -66,7 +67,7 @@ namespace ChocoLuxAPI.Controllers
             }
 
             return BadRequest(result.Errors);
-        }
+        }//i want the new registered user to have "User" role assigned automatically .
 
         [HttpPost("Login")]
         public async Task<IActionResult> Login(LoginDto model)
